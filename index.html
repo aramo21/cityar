@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CITYAR — Агентство недвижимости</title>
+    <link rel="stylesheet" href="style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>tailwind.config = { theme: { fontFamily: { sans: ['Manrope', 'Inter', 'Montserrat', 'Arial', 'sans-serif'] } } };</script>
+  </head>
+  <body class="bg-gradient-to-br from-[#f8fafc] via-[#e0e7ef] to-[#f1f5f9] min-h-screen flex flex-col font-sans">
+    <!-- Кнопка личного кабинета справа сверху -->
+    <a href="cabinet.html" class="fixed top-6 right-8 z-30 bg-white/90 rounded-full shadow p-2 hover:bg-blue-50 transition flex items-center justify-center" title="Личный кабинет">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-blue-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="8" r="4" stroke-width="2"/><path stroke-width="2" d="M4 20c0-3.314 3.582-6 8-6s8 2.686 8 6"/></svg>
+    </a>
+    <!-- Header -->
+    <header class="relative h-[60vh] flex flex-col justify-center items-center text-center bg-cover bg-center rounded-b-3xl shadow-xl overflow-hidden" style="background-image: url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80');">
+      <div class="absolute inset-0 bg-black/40"></div>
+      <div class="relative z-10">
+        <!-- Логотип и название -->
+        <div class="flex flex-col items-center">
+          <svg width="320" height="80" viewBox="0 0 320 80" fill="none" xmlns="http://www.w3.org/2000/svg" class="mb-2">
+            <rect x="12" y="28" width="14" height="44" rx="3" fill="#1e3a8a"/>
+            <rect x="32" y="14" width="14" height="58" rx="3" fill="#3b82f6"/>
+            <rect x="52" y="40" width="14" height="32" rx="3" fill="#e0e7ef"/>
+            <text x="85" y="65" font-family="Manrope, Inter, Montserrat, Arial, sans-serif" font-size="54" font-weight="bold" fill="#1e3a8a">CITYAR</text>
+          </svg>
+        </div>
+        <p class="mt-6 text-xl md:text-2xl text-white/90 max-w-2xl mx-auto leading-relaxed">Премиальное агентство недвижимости. Лучшие объекты в вашем городе — квартиры, дома, коммерция и новостройки.</p>
+      </div>
+    </header>
+    <!-- Каталог -->
+    <main class="flex-1 container mx-auto px-4 py-8">
+      <section>
+        <h2 class="text-3xl font-semibold mb-6 text-center">Каталог недвижимости</h2>
+        <!-- Фильтры и сортировка -->
+        <div id="filters" class="flex flex-wrap gap-4 justify-center mb-8"></div>
+        <!-- Карточки объектов -->
+        <div id="catalog" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"></div>
+      </section>
+    </main>
+    <!-- Footer -->
+    <footer class="bg-white/80 border-t border-gray-200 py-6 text-center text-gray-400 text-sm tracking-wide mt-12 rounded-t-2xl shadow-inner">© 2024 CITYAR. Все права защищены.</footer>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>
