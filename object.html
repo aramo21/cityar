@@ -1,0 +1,2491 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityAR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --neutral-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            --dark-gradient: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-dark: rgba(255, 255, 255, 0.1);
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.9) 100%),
+                url('https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3') center/cover no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            backdrop-filter: blur(20px);
+            background: var(--surface);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .back-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .back-button:hover {
+            transform: translateX(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .logo {
+            font-family: 'Manrope', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background: var(--surface-dark);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-name-display {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .dropdown-header {
+            padding: 15px 20px 10px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 5px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--surface-dark);
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            color: var(--text-secondary);
+        }
+
+        main {
+            margin-top: 80px;
+            padding: 40px 0;
+        }
+
+        .object-detail {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .image-gallery {
+            position: relative;
+            height: 600px;
+            overflow: hidden;
+        }
+
+        .gallery-main {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+
+        .gallery-thumbnails {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            padding: 15px;
+            border-radius: 12px;
+            max-width: calc(100% - 40px);
+            overflow-x: auto;
+        }
+
+        .thumbnail {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            flex-shrink: 0;
+        }
+
+        .thumbnail.active,
+        .thumbnail:hover {
+            border-color: white;
+            transform: scale(1.1);
+        }
+
+        .gallery-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .gallery-nav:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        .gallery-nav.prev {
+            left: 20px;
+        }
+
+        .gallery-nav.next {
+            right: 20px;
+        }
+
+        .object-content {
+            padding: 40px;
+        }
+
+        .object-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+            gap: 30px;
+        }
+
+        .object-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .object-location {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .object-price {
+            font-family: 'Manrope', sans-serif;
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: right;
+        }
+
+        .object-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .detail-item {
+            background: var(--surface-dark);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+
+        .detail-item .icon {
+            width: 50px;
+            height: 50px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .detail-content .value {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 2px;
+            color: var(--text-primary);
+        }
+
+        .detail-content .label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Новая сетка контента */
+        .main-content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .left-column {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Секция описания */
+        .description-section,
+        .characteristics-section {
+            background: var(--surface-dark);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .description-section h3,
+        .characteristics-section h3 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .description-content {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-primary);
+        }
+
+        /* Характеристики */
+        .characteristics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .char-group {
+            margin-bottom: 30px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .char-group-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 0 0 15px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .char-group-title i {
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .char-group-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .char-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .char-item:last-child {
+            border-bottom: none;
+        }
+
+        .char-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .char-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Виджет расположения */
+        .location-widget {
+            background: var(--surface-dark);
+            backdrop-filter: blur(10px);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .location-widget h3 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Компактная карта */
+        .compact-map {
+            width: 100%;
+            height: 250px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            background: #f0f0f0;
+        }
+
+        /* Информация о метро */
+        .metro-info {
+            margin-top: 15px;
+        }
+
+        .metro-station {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .metro-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            flex-shrink: 0;
+        }
+
+        .metro-m {
+            color: white;
+            font-size: 1.2rem;
+            font-family: 'Manrope', sans-serif;
+        }
+
+        /* Цвета линий метро */
+        .metro-red { background: #E42313; }
+        .metro-green { background: #4CB748; }
+        .metro-blue { background: #0078C9; }
+        .metro-brown { background: #8B4513; }
+        .metro-orange { background: #FF8C00; }
+        .metro-purple { background: #8E4EC6; }
+        .metro-pink { background: #F28CB1; }
+        .metro-yellow { background: #FFD700; }
+        .metro-aqua { background: #67C3CC; }
+        .metro-light-green { background: #B7D86C; }
+        .metro-gray { background: #969696; }
+        .metro-default { background: #667eea; }
+
+        .metro-details {
+            flex: 1;
+        }
+
+        .station-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .transport-times {
+            display: flex;
+            gap: 20px;
+        }
+
+        .time-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .time-item i {
+            font-size: 0.8rem;
+        }
+
+        /* Footer Styles */
+        .site-footer {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="none"><path d="M0,20 Q250,80 500,20 T1000,20 V100 H0 Z" fill="rgba(255,255,255,0.05)"/></svg>') no-repeat;
+            background-size: cover;
+        }
+
+        .footer-content {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-section h3,
+        .footer-section h4 {
+            font-family: 'Manrope', sans-serif;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-logo h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #f0f9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .footer-logo p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .contact-item i {
+            color: #60a5fa;
+            width: 16px;
+            margin-top: 2px;
+        }
+
+        .contact-item a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-bottom-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-copyright p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .footer-legal a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: white;
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            padding: 30px 0;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .action-buttons .btn-primary,
+        .action-buttons .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            min-width: 160px;
+            justify-content: center;
+        }
+
+        .action-buttons .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .action-buttons .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-buttons .btn-secondary {
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .action-buttons .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .main-content-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .object-details {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 12px;
+            }
+            
+            .detail-item {
+                padding: 15px;
+                gap: 12px;
+            }
+            
+            .detail-item .icon {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .detail-content .value {
+                font-size: 1.1rem;
+            }
+            
+            .characteristics-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .compact-map {
+                height: 200px;
+            }
+            
+            .metro-station {
+                padding: 12px;
+                gap: 12px;
+            }
+            
+            .metro-logo {
+                width: 35px;
+                height: 35px;
+            }
+            
+            .transport-times {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .description-section,
+            .characteristics-section,
+            .location-widget {
+                padding: 20px;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 40px 20px 30px;
+            }
+
+            .footer-bottom-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .footer-legal {
+                justify-content: center;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                padding: 20px 0;
+                margin-top: 30px;
+            }
+            
+            .action-buttons .btn-primary,
+            .action-buttons .btn-secondary {
+                min-width: auto;
+                width: 100%;
+                padding: 18px 20px;
+            }
+        }
+
+
+
+        .object-description h3 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+
+        .object-description p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn-secondary {
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        /* Request Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+        }
+
+        .modal.show {
+            display: block;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            width: 500px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .modal-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            display: block;
+            width: 100%;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-dark);
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+            display: block;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        /* Map and Transport Info Styles */
+        .location-section {
+            background: var(--surface-dark);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            border-radius: 16px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border);
+        }
+
+        .location-section h3 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .map-container {
+            height: 400px;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .transport-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .transport-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .transport-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow);
+        }
+
+        .transport-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .transport-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: white;
+            background: var(--primary-gradient);
+        }
+
+        .transport-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+        }
+
+        .transport-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .transport-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .transport-item:last-child {
+            border-bottom: none;
+        }
+
+        .transport-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .transport-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .metro-card {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .car-card {
+            background: linear-gradient(135deg, #28a745 0%, #218838 100%);
+        }
+
+        .walk-card {
+            background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .object-header {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .object-title {
+                font-size: 2rem;
+            }
+
+            .object-price {
+                font-size: 2.5rem;
+                text-align: left;
+            }
+
+            .object-details {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-primary,
+            .btn-secondary {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .gallery-thumbnails {
+                padding: 10px;
+            }
+
+            .thumbnail {
+                width: 60px;
+                height: 45px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .object-details {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+
+            .user-name {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="nav-left">
+                <a href="index.html" class="back-button">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Назад</span>
+                </a>
+                <a href="index.html" class="logo">
+                <svg class="logo-icon" viewBox="0 0 32 32" width="32" height="32">
+                    <defs>
+                        <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#2563eb"/>
+                            <stop offset="100%" style="stop-color:#1d4ed8"/>
+                        </linearGradient>
+                    </defs>
+                    <path fill="url(#logoGradient)" d="M16 2L4 12v16a2 2 0 0 0 2 2h6V20h8v10h6a2 2 0 0 0 2-2V12L16 2z"/>
+                    <circle fill="#60a5fa" cx="16" cy="14" r="3"/>
+                </svg>
+                CityAR
+            </a>
+            </div>
+            <div class="nav-actions">
+                <div class="user-menu">
+                    <div class="user-info" onclick="toggleDropdown()" id="userInfo">
+                        <div class="user-avatar" id="userAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-name-display" id="userNameDisplay" style="display: none;">
+                            <span id="userNameText">Пользователь</span>
+                        </div>
+                    </div>
+                    <div class="dropdown" id="userDropdown">
+                        <!-- Menu items for non-authenticated users -->
+                        <div class="auth-menu" id="authMenu">
+                            <a href="index.html" class="dropdown-item">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Войти</span>
+                            </a>
+                            <a href="index.html" class="dropdown-item">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Регистрация</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Menu items for authenticated users -->
+                        <div class="user-authenticated-menu" id="userAuthenticatedMenu" style="display: none;">
+                            <div class="dropdown-header">
+                                <span class="user-name" id="userName">Пользователь</span>
+                            </div>
+                            <a href="cabinet.html" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Личный кабинет</span>
+                            </a>
+                            <a href="requests.html" class="dropdown-item">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Мои заявки</span>
+                            </a>
+                            <a href="admin.html" class="dropdown-item admin-only" style="display: none;">
+                                <i class="fas fa-cog"></i>
+                                <span>Панель админа</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="logout()">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Выйти</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="object-detail" id="objectDetail">
+                <!-- Загрузка объекта... -->
+                <div style="padding: 60px; text-align: center; color: var(--text-secondary);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 20px;"></i>
+                    <p>Загрузка информации об объекте...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Request Modal -->
+    <div class="modal" id="requestModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Подать заявку</h3>
+                <button class="modal-close" onclick="closeRequestModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="requestForm">
+                <div class="form-group">
+                    <label class="form-label" for="requestMessage">Сообщение *</label>
+                    <textarea class="form-textarea" id="requestMessage" placeholder="Опишите ваш интерес к данному объекту..." required></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="requestName">Имя</label>
+                    <input type="text" class="form-input" id="requestName" placeholder="Ваше имя">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="requestPhone">Телефон</label>
+                    <input type="tel" class="form-input" id="requestPhone" placeholder="+7 (___) ___-__-__">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="requestEmail">Email</label>
+                    <input type="email" class="form-input" id="requestEmail" placeholder="example@email.com">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-paper-plane"></i>
+                    <span>Отправить заявку</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let currentObject = null;
+        let images = [];
+        let currentImageIndex = 0;
+
+        // Auth functions
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (!token) {
+                // Show login button instead of user info
+                const userInfo = document.querySelector('.user-info');
+                if (userInfo) {
+                    userInfo.innerHTML = '<a href="index.html" class="btn-secondary">Войти</a>';
+                }
+                return false;
+            }
+
+            // Update user info
+            if (user.name) {
+                const userName = document.getElementById('userName');
+                const userAvatar = document.getElementById('userAvatar');
+                if (userName) userName.textContent = user.name;
+                if (userAvatar) userAvatar.innerHTML = user.name.charAt(0).toUpperCase();
+            }
+            return true;
+        }
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Logout function is now in script.js
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu');
+            if (!userMenu.contains(event.target)) {
+                document.getElementById('userDropdown').classList.remove('show');
+            }
+        });
+
+        // Gallery functions
+        function showImage(index) {
+            currentImageIndex = index;
+            const mainImage = document.getElementById('mainImage');
+            const thumbnails = document.querySelectorAll('.thumbnail');
+            
+            mainImage.src = images[index];
+            
+            thumbnails.forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === index);
+            });
+        }
+
+        function nextImage() {
+            const nextIndex = (currentImageIndex + 1) % images.length;
+            showImage(nextIndex);
+        }
+
+        function prevImage() {
+            const prevIndex = (currentImageIndex - 1 + images.length) % images.length;
+            showImage(prevIndex);
+        }
+
+                // Modal functions
+        function showRequestModal() {
+            const modal = document.getElementById('requestModal');
+            if (modal) {
+                // Fill form with user data if logged in
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const token = localStorage.getItem('token');
+                
+                console.log('User data:', user);
+                console.log('Token exists:', !!token);
+                
+                // Auto-fill name
+                const nameInput = document.getElementById('requestName');
+                if (nameInput) {
+                    if (user.name && token) {
+                        nameInput.value = user.name;
+                        console.log('Name filled:', user.name);
+                    } else {
+                        nameInput.value = '';
+                        console.log('Name not filled - user.name:', user.name, 'token:', !!token);
+                    }
+                }
+                
+                // Auto-fill phone
+                const phoneInput = document.getElementById('requestPhone');
+                if (phoneInput) {
+                    if (user.phone && token) {
+                        phoneInput.value = user.phone;
+                        console.log('Phone filled:', user.phone);
+                    } else {
+                        phoneInput.value = '';
+                        console.log('Phone not filled - user.phone:', user.phone, 'token:', !!token);
+                    }
+                }
+                
+                // Auto-fill email
+                const emailInput = document.getElementById('requestEmail');
+                if (emailInput) {
+                    if (user.email && token) {
+                        emailInput.value = user.email;
+                        console.log('Email filled:', user.email);
+                    } else {
+                        emailInput.value = '';
+                        console.log('Email not filled - user.email:', user.email, 'token:', !!token);
+                    }
+                }
+                
+                // Set default message
+                const messageInput = document.getElementById('requestMessage');
+                if (messageInput && currentObject) {
+                    messageInput.value = `Здравствуйте! Меня интересует ${currentObject.title} по адресу ${currentObject.location}. Хотел бы получить дополнительную информацию.`;
+                }
+                
+                modal.classList.add('show');
+            }
+        }
+
+        function closeRequestModal() {
+            const modal = document.getElementById('requestModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // Close modal on background click
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                closeRequestModal();
+            }
+        });
+
+        // Simple notification function if not available
+        function showSimpleNotification(message) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #4CAF50;
+                color: white;
+                padding: 15px 25px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                z-index: 10001;
+                font-family: 'Manrope', sans-serif;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 2000);
+        }
+
+        // Logout function
+        function logout() {
+            // Clear user data
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // Show notification instead of modal
+            if (typeof showNotification === 'function') {
+                showNotification('Вы успешно вышли из аккаунта', 'info');
+            } else {
+                showSimpleNotification('Вы успешно вышли из аккаунта');
+            }
+            
+            // Redirect to main page after a short delay
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1500);
+        }
+
+        // Handle old modal form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            const requestForm = document.getElementById('requestForm');
+            if (requestForm) {
+                requestForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const message = document.getElementById('requestMessage').value;
+                    const name = document.getElementById('requestName').value;
+                    const phone = document.getElementById('requestPhone').value;
+                    const email = document.getElementById('requestEmail').value;
+                    
+                    if (!message.trim()) {
+                        if (typeof showNotification === 'function') {
+                            showNotification('Введите сообщение', 'warning');
+                        } else {
+                            alert('Введите сообщение');
+                        }
+                        return;
+                    }
+                    
+                    try {
+                        const response = await fetch('/api/requests', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + localStorage.getItem('token')
+                            },
+                            body: JSON.stringify({
+                                object_id: currentObject.id,
+                                message,
+                                name,
+                                phone,
+                                email
+                            })
+                        });
+                        
+                        if (response.ok) {
+                            if (typeof showNotification === 'function') {
+                                showNotification('Заявка успешно отправлена! Мы свяжемся с вами в ближайшее время.', 'success');
+                            } else {
+                                alert('Заявка успешно отправлена!');
+                            }
+                            closeRequestModal();
+                            requestForm.reset();
+                        } else {
+                            const error = await response.json();
+                            if (typeof showNotification === 'function') {
+                                showNotification('Ошибка при отправке заявки: ' + error.error, 'error');
+                            } else {
+                                alert('Ошибка: ' + error.error);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        if (typeof showNotification === 'function') {
+                            showNotification('Произошла ошибка при отправке заявки', 'error');
+                        } else {
+                            alert('Произошла ошибка при отправке заявки');
+                        }
+                    }
+                });
+            }
+        });
+
+        // Utility functions
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ru-RU').format(price);
+        }
+
+        function getObjectTypeText(type) {
+            const types = {
+                'apartment': 'Квартира',
+                'house': 'Дом',
+                'commercial': 'Коммерческая недвижимость',
+                'land': 'Земельный участок'
+            };
+            return types[type] || 'Недвижимость';
+        }
+
+        function formatPhoneNumber(input) {
+            let value = input.value.replace(/\D/g, '');
+            if (value.startsWith('8')) value = '7' + value.slice(1);
+            if (!value.startsWith('7')) value = '7' + value;
+            
+            if (value.length > 1) {
+                value = value.slice(0, 11);
+                const formatted = value.replace(/^7(\d{3})(\d{3})(\d{2})(\d{2})$/, '+7 ($1) $2-$3-$4');
+                if (formatted.includes('(')) {
+                    input.value = formatted;
+                } else {
+                    input.value = '+7 ' + value.slice(1);
+                }
+            }
+        }
+
+        // Load object detail
+        async function loadObjectDetail() {
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const objectId = urlParams.get('id');
+                
+                if (!objectId) {
+                    window.location.href = 'index.html';
+                    return;
+                }
+
+                const response = await fetch(`/api/objects/${objectId}`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Объект не найден');
+                }
+
+                currentObject = await response.json();
+                
+                // Setup images
+                images = currentObject.images || [];
+                if (currentObject.additional_images) {
+                    const additionalImages = currentObject.additional_images.split(',').filter(img => img.trim());
+                    images = images.concat(additionalImages);
+                }
+                
+                // Render object details
+                const container = document.getElementById('objectDetail');
+                container.innerHTML = `
+                    <div class="image-gallery">
+                        <img src="${images[0]}" alt="${currentObject.title}" class="gallery-main" id="mainImage">
+                        ${images.length > 1 ? `
+                            <button class="gallery-nav prev" onclick="prevImage()">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <button class="gallery-nav next" onclick="nextImage()">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                            <div class="gallery-thumbnails">
+                                ${images.map((img, index) => 
+                                    `<img src="${img}" alt="Фото ${index + 1}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="showImage(${index})">`
+                                ).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="object-content">
+                        <div class="object-header">
+                            <div>
+                                <h1 class="object-title">${currentObject.title}</h1>
+                                <div class="object-location">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>${currentObject.location}</span>
+                                </div>
+                            </div>
+                            <div class="object-price">${formatPrice(currentObject.price)} ₽</div>
+                        </div>
+                        
+                        <div class="object-details">
+                            <div class="detail-item">
+                                <div class="icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="value">${getObjectTypeText(currentObject.type)}</div>
+                                    <div class="label">Тип объекта</div>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <div class="icon">
+                                    <i class="fas fa-ruler-combined"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="value">${currentObject.area ? currentObject.area + ' м²' : 'Не указана'}</div>
+                                    <div class="label">Общая площадь</div>
+                                </div>
+                            </div>
+                            ${currentObject.living_area ? `
+                                <div class="detail-item">
+                                    <div class="icon">
+                                        <i class="fas fa-couch"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="value">${currentObject.living_area} м²</div>
+                                        <div class="label">Жилая площадь</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${currentObject.kitchen_area ? `
+                                <div class="detail-item">
+                                    <div class="icon">
+                                        <i class="fas fa-utensils"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="value">${currentObject.kitchen_area} м²</div>
+                                        <div class="label">Площадь кухни</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            <div class="detail-item">
+                                <div class="icon">
+                                    <i class="fas fa-bed"></i>
+                                </div>
+                                <div class="detail-content">
+                                    <div class="value">${currentObject.rooms || 'Не указано'}</div>
+                                    <div class="label">Комнат</div>
+                                </div>
+                            </div>
+                            ${currentObject.floor && currentObject.max_floor ? `
+                                <div class="detail-item">
+                                    <div class="icon">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="value">${currentObject.floor}/${currentObject.max_floor}</div>
+                                        <div class="label">Этаж</div>
+                                    </div>
+                                </div>
+                            ` : currentObject.floor ? `
+                                <div class="detail-item">
+                                    <div class="icon">
+                                        <i class="fas fa-layer-group"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="value">${currentObject.floor}</div>
+                                        <div class="label">Этаж</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${currentObject.building_year ? `
+                                <div class="detail-item">
+                                    <div class="icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="value">${currentObject.building_year} г.</div>
+                                        <div class="label">Год постройки</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            ${currentObject.apartment_type ? `
+                                <div class="detail-item">
+                                    <div class="icon">
+                                        <i class="fas fa-key"></i>
+                                    </div>
+                                    <div class="detail-content">
+                                        <div class="value">${currentObject.apartment_type}</div>
+                                        <div class="label">Тип жилья</div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        
+                        <div class="main-content-grid">
+                            <div class="left-column">
+                                <div class="description-section">
+                                    <h3>
+                                        <i class="fas fa-align-left"></i>
+                                        Описание
+                                    </h3>
+                                    <div class="description-content">
+                                        ${currentObject.description || 'Описание не указано'}
+                                    </div>
+                                </div>
+                                
+                                <div class="characteristics-section">
+                                    <h3>
+                                        <i class="fas fa-list-ul"></i>
+                                        Характеристики объекта
+                                    </h3>
+                                    
+                                    <!-- О квартире -->
+                                    <div class="char-group">
+                                        <h4 class="char-group-title">
+                                            <i class="fas fa-home"></i>
+                                            О квартире
+                                        </h4>
+                                        <div class="char-group-grid">
+                                            <div class="char-item">
+                                                <span class="char-label">Общая площадь</span>
+                                                <span class="char-value">${currentObject.area ? currentObject.area + ' м²' : 'Не указана'}</span>
+                                            </div>
+                                            ${currentObject.living_area ? `
+                                                <div class="char-item">
+                                                    <span class="char-label">Жилая площадь</span>
+                                                    <span class="char-value">${currentObject.living_area} м²</span>
+                                                </div>
+                                            ` : ''}
+                                            ${currentObject.kitchen_area ? `
+                                                <div class="char-item">
+                                                    <span class="char-label">Площадь кухни</span>
+                                                    <span class="char-value">${currentObject.kitchen_area} м²</span>
+                                                </div>
+                                            ` : ''}
+                                            <div class="char-item">
+                                                <span class="char-label">Комнат</span>
+                                                <span class="char-value">${currentObject.rooms || 'Не указано'}</span>
+                                            </div>
+                                            ${currentObject.floor && currentObject.max_floor ? `
+                                                <div class="char-item">
+                                                    <span class="char-label">Этаж</span>
+                                                    <span class="char-value">${currentObject.floor}/${currentObject.max_floor}</span>
+                                                </div>
+                                            ` : currentObject.floor ? `
+                                                <div class="char-item">
+                                                    <span class="char-label">Этаж</span>
+                                                    <span class="char-value">${currentObject.floor}</span>
+                                                </div>
+                                            ` : ''}
+                                            ${currentObject.apartment_type ? `
+                                                <div class="char-item">
+                                                    <span class="char-label">Тип жилья</span>
+                                                    <span class="char-value">${currentObject.apartment_type}</span>
+                                                </div>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+
+                                    <!-- Удобства -->
+                                    ${(currentObject.bathroom_count || currentObject.balcony_type || currentObject.window_view || currentObject.repair_type) ? `
+                                        <div class="char-group">
+                                            <h4 class="char-group-title">
+                                                <i class="fas fa-bath"></i>
+                                                Удобства и комфорт
+                                            </h4>
+                                            <div class="char-group-grid">
+                                                ${currentObject.bathroom_count ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Санузлы</span>
+                                                        <span class="char-value">${currentObject.bathroom_count} ${currentObject.bathroom_type ? '(' + currentObject.bathroom_type.toLowerCase() + ')' : ''}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${currentObject.balcony_type && currentObject.balcony_type !== 'Нет' ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Балкон/лоджия</span>
+                                                        <span class="char-value">${currentObject.balcony_type} ${currentObject.balcony_count ? '(' + currentObject.balcony_count + ' шт.)' : ''}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${currentObject.window_view ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Вид из окон</span>
+                                                        <span class="char-value">${currentObject.window_view}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${currentObject.repair_type ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Ремонт</span>
+                                                        <span class="char-value">${currentObject.repair_type}</span>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+
+                                    <!-- О доме -->
+                                    ${(currentObject.building_year || currentObject.building_type || currentObject.parking_type || currentObject.heating_type || currentObject.gas_supply) ? `
+                                        <div class="char-group">
+                                            <h4 class="char-group-title">
+                                                <i class="fas fa-building"></i>
+                                                О доме
+                                            </h4>
+                                            <div class="char-group-grid">
+                                                ${currentObject.building_year ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Год постройки</span>
+                                                        <span class="char-value">${currentObject.building_year} г.</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${currentObject.building_type ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Тип дома</span>
+                                                        <span class="char-value">${currentObject.building_type}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${currentObject.parking_type && currentObject.parking_type !== 'Нет' ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Парковка</span>
+                                                        <span class="char-value">${currentObject.parking_type}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${currentObject.heating_type ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Отопление</span>
+                                                        <span class="char-value">${currentObject.heating_type}</span>
+                                                    </div>
+                                                ` : ''}
+                                                ${currentObject.gas_supply && currentObject.gas_supply !== 'Нет' ? `
+                                                    <div class="char-item">
+                                                        <span class="char-label">Газоснабжение</span>
+                                                        <span class="char-value">${currentObject.gas_supply}</span>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                            
+                            <div class="right-column">
+                                <div class="location-widget">
+                                    <h3>
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        Расположение
+                                    </h3>
+                                    <div class="compact-map" id="map"></div>
+                                    
+                                    ${currentObject.nearest_metro ? `
+                                        <div class="metro-info">
+                                            <div class="metro-station">
+                                                <div class="metro-logo ${getMetroLineClass(currentObject.nearest_metro)}">
+                                                    <span class="metro-m">М</span>
+                                                </div>
+                                                <div class="metro-details">
+                                                    <div class="station-name">${currentObject.nearest_metro}</div>
+                                                    <div class="transport-times">
+                                                        <span class="time-item">
+                                                            <i class="fas fa-walking"></i>
+                                                            ${currentObject.metro_distance_minutes} мин
+                                                        </span>
+                                                        <span class="time-item">
+                                                            <i class="fas fa-car"></i>
+                                                            ${Math.ceil(currentObject.metro_distance_minutes / 3)} мин
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div class="action-buttons">
+                            <button class="btn-primary" onclick="showRequestModal()">
+                                <i class="fas fa-paper-plane"></i>
+                                <span>Подать заявку</span>
+                            </button>
+                            <a href="tel:+79266124929" class="btn-secondary">
+                                <i class="fas fa-phone"></i>
+                                <span>Позвонить</span>
+                            </a>
+                            <button class="btn-secondary" onclick="shareObject()">
+                                <i class="fas fa-share-alt"></i>
+                                <span>Поделиться</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // Update page title
+                document.title = `CityAR - ${currentObject.title}`;
+                
+                // Initialize map after DOM is updated
+                setTimeout(() => initializeMap(), 100);
+                
+            } catch (error) {
+                console.error('Error loading object:', error);
+                document.getElementById('objectDetail').innerHTML = `
+                    <div style="padding: 60px; text-align: center;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: #f5576c; margin-bottom: 20px;"></i>
+                        <h2 style="color: var(--text-primary); margin-bottom: 10px;">Объект не найден</h2>
+                        <p style="color: var(--text-secondary); margin-bottom: 30px;">Извините, запрошенный объект не существует или был удален</p>
+                        <a href="index.html" class="btn-primary">
+                            <i class="fas fa-arrow-left"></i>
+                            <span>Вернуться к каталогу</span>
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        function shareObject() {
+            if (navigator.share) {
+                navigator.share({
+                    title: currentObject.title,
+                    text: `Посмотрите этот объект недвижимости: ${currentObject.title}`,
+                    url: window.location.href
+                });
+            } else {
+                navigator.clipboard.writeText(window.location.href).then(() => {
+                    showNotification('Ссылка скопирована в буфер обмена', 'success');
+                });
+            }
+        }
+
+        // Функция для определения цвета линии метро
+        function getMetroLineClass(stationName) {
+            // Московское метро - основные линии
+            const metroLines = {
+                // Сокольническая линия (красная)
+                'Сокольники': 'metro-red',
+                'Красносельская': 'metro-red',
+                'Комсомольская': 'metro-red',
+                'Красные Ворота': 'metro-red',
+                'Лубянка': 'metro-red',
+                'Охотный Ряд': 'metro-red',
+                'Библиотека имени Ленина': 'metro-red',
+                'Кропоткинская': 'metro-red',
+                'Парк Культуры': 'metro-red',
+                'Фрунзенская': 'metro-red',
+                'Спортивная': 'metro-red',
+                'Воробьёвы горы': 'metro-red',
+                'Университет': 'metro-red',
+                'Проспект Вернадского': 'metro-red',
+                'Юго-Западная': 'metro-red',
+                
+                // Замоскворецкая линия (зелёная)
+                'Речной вокзал': 'metro-green',
+                'Водный стадион': 'metro-green',
+                'Войковская': 'metro-green',
+                'Сокол': 'metro-green',
+                'Аэропорт': 'metro-green',
+                'Динамо': 'metro-green',
+                'Белорусская': 'metro-green',
+                'Маяковская': 'metro-green',
+                'Тверская': 'metro-green',
+                'Театральная': 'metro-green',
+                'Новокузнецкая': 'metro-green',
+                'Павелецкая': 'metro-green',
+                'Автозаводская': 'metro-green',
+                'Коломенская': 'metro-green',
+                'Каширская': 'metro-green',
+                'Кантемировская': 'metro-green',
+                'Царицыно': 'metro-green',
+                'Орехово': 'metro-green',
+                'Домодедовская': 'metro-green',
+                'Красногвардейская': 'metro-green',
+                'Алма-Атинская': 'metro-green',
+                
+                // Арбатско-Покровская линия (синяя)
+                'Щелковская': 'metro-blue',
+                'Первомайская': 'metro-blue',
+                'Измайловская': 'metro-blue',
+                'Партизанская': 'metro-blue',
+                'Семёновская': 'metro-blue',
+                'Электрозаводская': 'metro-blue',
+                'Бауманская': 'metro-blue',
+                'Курская': 'metro-blue',
+                'Площадь Революции': 'metro-blue',
+                'Арбатская': 'metro-blue',
+                'Смоленская': 'metro-blue',
+                'Киевская': 'metro-blue',
+                'Парк Победы': 'metro-blue',
+                'Славянский бульвар': 'metro-blue',
+                'Кунцевская': 'metro-blue',
+                'Молодёжная': 'metro-blue',
+                'Крылатское': 'metro-blue',
+                'Строгино': 'metro-blue',
+                'Мякинино': 'metro-blue',
+                'Волоколамская': 'metro-blue',
+                'Митино': 'metro-blue',
+                'Пятницкое шоссе': 'metro-blue',
+                
+                // Сокольническая (красная) - дополнения
+                'Преображенская площадь': 'metro-red',
+                'Черкизовская': 'metro-red',
+                'Улица Подбельского': 'metro-red',
+                'Красногвардейская': 'metro-red',
+                
+                // Кольцевая линия (коричневая)
+                'Киевская': 'metro-brown',
+                'Парк культуры': 'metro-brown',
+                'Октябрьская': 'metro-brown',
+                'Добрынинская': 'metro-brown',
+                'Павелецкая': 'metro-brown',
+                'Таганская': 'metro-brown',
+                'Курская': 'metro-brown',
+                'Комсомольская': 'metro-brown',
+                'Проспект Мира': 'metro-brown',
+                'Новослободская': 'metro-brown',
+                'Белорусская': 'metro-brown',
+                'Краснопресненская': 'metro-brown',
+                
+                // Калужско-Рижская линия (оранжевая)
+                'Медведково': 'metro-orange',
+                'Бабушкинская': 'metro-orange',
+                'Свиблово': 'metro-orange',
+                'Ботанический сад': 'metro-orange',
+                'ВДНХ': 'metro-orange',
+                'Алексеевская': 'metro-orange',
+                'Рижская': 'metro-orange',
+                'Проспект Мира': 'metro-orange',
+                'Сухаревская': 'metro-orange',
+                'Тургеневская': 'metro-orange',
+                'Китай-город': 'metro-orange',
+                'Третьяковская': 'metro-orange',
+                'Октябрьская': 'metro-orange',
+                'Шаболовская': 'metro-orange',
+                'Ленинский проспект': 'metro-orange',
+                'Академическая': 'metro-orange',
+                'Профсоюзная': 'metro-orange',
+                'Новые Черёмушки': 'metro-orange',
+                'Калужская': 'metro-orange',
+                'Беляево': 'metro-orange',
+                'Коньково': 'metro-orange',
+                'Тёплый Стан': 'metro-orange',
+                'Ясенево': 'metro-orange',
+                'Новоясеневская': 'metro-orange'
+            };
+            
+            return metroLines[stationName] || 'metro-default';
+        }
+
+        // Map functions
+        function initializeMap() {
+            const mapContainer = document.getElementById('map');
+            if (!mapContainer) return;
+
+            // Проверяем доступность Яндекс.Карт
+            if (typeof ymaps === 'undefined') {
+                console.log('Яндекс.Карты не загружены, используем заглушку');
+                showMapPlaceholder();
+                return;
+            }
+
+            ymaps.ready(function () {
+                // Используем координаты объекта или координаты Москвы по умолчанию
+                const defaultCoords = [55.7558, 37.6176]; // Москва
+                let objectCoords = defaultCoords;
+                
+                if (currentObject.latitude && currentObject.longitude) {
+                    objectCoords = [parseFloat(currentObject.latitude), parseFloat(currentObject.longitude)];
+                }
+
+                // Инициализируем карту
+                const map = new ymaps.Map('map', {
+                    center: objectCoords,
+                    zoom: 16,
+                    controls: ['zoomControl', 'typeSelector', 'fullscreenControl']
+                });
+
+                // Добавляем метку объекта
+                const placemark = new ymaps.Placemark(objectCoords, {
+                    balloonContentHeader: currentObject.title,
+                    balloonContentBody: `
+                        <div style="max-width: 250px;">
+                            ${currentObject.images && currentObject.images.length > 0 ? 
+                                `<img src="${currentObject.images[0]}" style="width: 100%; height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 10px;" alt="${currentObject.title}">` : 
+                                ''
+                            }
+                            <p style="margin: 0; font-size: 14px; color: #333;">${currentObject.location}</p>
+                            <p style="margin: 5px 0 0 0; font-weight: bold; color: #2563eb; font-size: 16px;">${formatPrice(currentObject.price)} ₽</p>
+                        </div>
+                    `,
+                    balloonContentFooter: currentObject.nearest_metro ? `
+                        <div style="margin-top: 10px;">
+                            <small style="color: #666;">🚇 ${currentObject.nearest_metro} - ${currentObject.metro_distance_minutes} мин пешком</small>
+                        </div>
+                    ` : ''
+                }, {
+                    preset: 'islands#redDotIcon',
+                    iconColor: '#2563eb'
+                });
+
+                map.geoObjects.add(placemark);
+                
+                // Если нет координат, попробуем геокодировать адрес
+                if (!currentObject.latitude || !currentObject.longitude) {
+                    ymaps.geocode(currentObject.location, {
+                        results: 1
+                    }).then(function (res) {
+                        const firstGeoObject = res.geoObjects.get(0);
+                        if (firstGeoObject) {
+                            const coords = firstGeoObject.geometry.getCoordinates();
+                            
+                            // Обновляем позицию карты и метки
+                            map.setCenter(coords, 16);
+                            placemark.geometry.setCoordinates(coords);
+                        }
+                    }).catch(function(error) {
+                        console.log('Ошибка геокодирования:', error);
+                    });
+                }
+
+                // Открываем балун метки при загрузке
+                setTimeout(() => {
+                    placemark.balloon.open();
+                }, 1000);
+            });
+        }
+
+        function showMapPlaceholder() {
+            const mapContainer = document.getElementById('map');
+            if (mapContainer) {
+                mapContainer.innerHTML = `
+                    <div style="
+                        height: 100%; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center; 
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        text-align: center;
+                        flex-direction: column;
+                        gap: 15px;
+                    ">
+                        <i class="fas fa-map-marker-alt" style="font-size: 3rem; opacity: 0.8;"></i>
+                        <div>
+                            <h4 style="margin: 0 0 10px 0;">Интерактивная карта</h4>
+                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">
+                                ${currentObject.location}<br>
+                                📍 ${currentObject.latitude?.toFixed(6)}, ${currentObject.longitude?.toFixed(6)}
+                            </p>
+                        </div>
+                        <button onclick="openInYandexMaps()" style="
+                            background: rgba(255,255,255,0.2);
+                            border: 1px solid rgba(255,255,255,0.3);
+                            color: white;
+                            padding: 10px 20px;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            transition: all 0.3s ease;
+                        " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                            Открыть в Яндекс.Картах
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function openInYandexMaps() {
+            if (currentObject && currentObject.latitude && currentObject.longitude) {
+                const url = `https://yandex.ru/maps/?ll=${currentObject.longitude},${currentObject.latitude}&z=16&pt=${currentObject.longitude},${currentObject.latitude},pm2rdm`;
+                window.open(url, '_blank');
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadObjectDetail();
+            
+            // Handle request form submission
+            document.getElementById('requestForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const message = document.getElementById('requestMessage').value;
+                const phone = document.getElementById('requestPhone').value;
+                const email = document.getElementById('requestEmail').value;
+                
+                if (!message.trim()) {
+                    alert('Введите сообщение');
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/api/requests', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + localStorage.getItem('token')
+                        },
+                        body: JSON.stringify({
+                            object_id: currentObject.id,
+                            message,
+                            phone,
+                            email
+                        })
+                    });
+                    
+                    if (response.ok) {
+                        alert('Заявка успешно отправлена!');
+                        closeRequestModal();
+                        document.getElementById('requestForm').reset();
+                    } else {
+                        const error = await response.json();
+                        alert('Ошибка: ' + error.error);
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('Произошла ошибка при отправке заявки');
+                }
+            });
+            
+            // Phone formatting
+            document.getElementById('requestPhone').addEventListener('input', function(e) {
+                formatPhoneNumber(e.target);
+            });
+        });
+
+        // Keyboard navigation for gallery
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowLeft') {
+                prevImage();
+            } else if (e.key === 'ArrowRight') {
+                nextImage();
+            } else if (e.key === 'Escape') {
+                closeRequestModal();
+            }
+        });
+    </script>
+    <script src="script.js"></script>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <h3>CityAR</h3>
+                    <p>Ваш надежный партнер в мире недвижимости</p>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-vk"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Каталог</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Все объекты</a></li>
+                    <li><a href="index.html?type=apartment">Квартиры</a></li>
+                    <li><a href="index.html?type=house">Дома</a></li>
+                    <li><a href="index.html?type=commercial">Коммерческая</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Действия</h4>
+                <ul class="footer-links">
+                    <li><a href="requests.html">Мои заявки</a></li>
+                    <li><a href="cabinet.html">Личный кабинет</a></li>
+                    <li><a href="#" onclick="shareObject()">Поделиться объектом</a></li>
+                    <li><a href="index.html">Вернуться к каталогу</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <div class="footer-contact">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>г. Москва, ул. Тверская, д. 15</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <a href="tel:+79266124929">+7 (926) 612-49-29</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:info@cityar.ru">info@cityar.ru</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <div class="footer-copyright">
+                    <p>&copy; 2024 CityAR. Все права защищены.</p>
+                </div>
+                <div class="footer-legal">
+                    <a href="#">Политика конфиденциальности</a>
+                    <a href="#">Пользовательское соглашение</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 

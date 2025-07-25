@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityAR Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-dark: rgba(255, 255, 255, 0.1);
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                linear-gradient(135deg, rgba(37, 99, 235, 0.85) 0%, rgba(29, 78, 216, 0.85) 100%),
+                url('https://images.unsplash.com/photo-1570129477492-45c003edd2be?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3') center/cover no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        .admin-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .main-content {
+            padding: 2rem 0;
+        }
+
+        .admin-nav {
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .nav-tab i {
+            font-size: 1.25rem;
+        }
+
+        /* Request cards styles */
+        .request-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .request-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .request-info h3 {
+            margin: 0 0 0.25rem 0;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .request-date {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .request-status {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-new {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .status-in_progress {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .status-completed {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .status-rejected {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+            color: white;
+        }
+
+        .request-content {
+            margin-bottom: 1.5rem;
+        }
+
+        .request-contacts {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .contact-item i {
+            color: #667eea;
+            width: 16px;
+        }
+
+        .request-object {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.05);
+            border-radius: 12px;
+            margin-bottom: 1rem;
+        }
+
+        .request-object i {
+            color: #667eea;
+            font-size: 1.1rem;
+            margin-top: 0.2rem;
+        }
+
+        .request-message {
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.02);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+
+        .request-message strong {
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .request-message p {
+            margin: 0;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .request-actions {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .btn-small:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .empty-state, .error-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-tab.active {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .content-section {
+            display: none;
+            background: var(--surface);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Objects Grid */
+        .objects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .object-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .object-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .object-image {
+            height: 200px;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        .object-status {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .status-active {
+            background: var(--success-gradient);
+        }
+
+        .status-inactive {
+            background: var(--danger-gradient);
+        }
+
+        .object-info {
+            padding: 1.5rem;
+        }
+
+        .object-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .object-price {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .object-location {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .object-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            border-radius: 8px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: var(--surface);
+            margin: 2% auto;
+            padding: 0;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 1.5rem 2rem;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close {
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+        .close:hover {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 2rem;
+        }
+
+                 /* Form Styles */
+         .form-grid {
+             display: grid;
+             grid-template-columns: 1fr 1fr;
+             gap: 1.5rem;
+             margin-bottom: 1.5rem;
+         }
+
+         .form-group {
+             margin-bottom: 1.5rem;
+         }
+
+         .form-group.full-width {
+             grid-column: 1 / -1;
+         }
+
+         .form-label {
+             display: block;
+             margin-bottom: 0.8rem;
+             font-weight: 600;
+             color: var(--text-primary);
+             font-size: 0.95rem;
+         }
+
+         .form-input {
+             width: 100%;
+             padding: 16px 20px;
+             border: 2px solid rgba(255, 255, 255, 0.2);
+             border-radius: 16px;
+             background: rgba(255, 255, 255, 0.05);
+             backdrop-filter: blur(20px);
+             color: var(--text-primary);
+             font-size: 1rem;
+             font-family: 'Inter', sans-serif;
+             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+         }
+
+         .form-input:focus {
+             outline: none;
+             border-color: rgba(102, 126, 234, 0.6);
+             background: rgba(255, 255, 255, 0.15);
+             box-shadow: 
+                 0 8px 32px rgba(102, 126, 234, 0.2),
+                 0 0 0 1px rgba(102, 126, 234, 0.3);
+             transform: translateY(-2px);
+         }
+
+         .form-input::placeholder {
+             color: rgba(26, 26, 26, 0.5);
+             font-weight: 400;
+         }
+
+         .form-textarea {
+             height: 120px;
+             resize: vertical;
+             font-family: 'Inter', sans-serif;
+             line-height: 1.6;
+         }
+
+         /* Custom Select Styles */
+         .custom-select {
+             position: relative;
+             width: 100%;
+         }
+
+         .custom-select .select-display {
+             width: 100%;
+             padding: 16px 20px;
+             border: 2px solid rgba(255, 255, 255, 0.2);
+             border-radius: 16px;
+             background: rgba(255, 255, 255, 0.05);
+             backdrop-filter: blur(20px);
+             color: var(--text-primary);
+             font-size: 1rem;
+             font-family: 'Inter', sans-serif;
+             cursor: pointer;
+             display: flex;
+             justify-content: space-between;
+             align-items: center;
+             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+         }
+
+         .custom-select .select-display:hover {
+             border-color: rgba(102, 126, 234, 0.4);
+             background: rgba(255, 255, 255, 0.1);
+             transform: translateY(-1px);
+             box-shadow: 0 6px 25px rgba(102, 126, 234, 0.15);
+         }
+
+         .custom-select.active .select-display {
+             border-color: rgba(102, 126, 234, 0.6);
+             background: rgba(255, 255, 255, 0.15);
+             box-shadow: 
+                 0 8px 32px rgba(102, 126, 234, 0.2),
+                 0 0 0 1px rgba(102, 126, 234, 0.3);
+             transform: translateY(-2px);
+         }
+
+         .custom-select .select-arrow {
+             transition: all 0.3s ease;
+             color: var(--text-secondary);
+         }
+
+         .custom-select.active .select-arrow {
+             transform: rotate(180deg);
+             color: #667eea;
+         }
+
+         .custom-select .select-options {
+             position: absolute;
+             top: 100%;
+             left: 0;
+             right: 0;
+             background: var(--surface);
+             backdrop-filter: blur(20px);
+             border: 2px solid rgba(102, 126, 234, 0.2);
+             border-radius: 16px;
+             margin-top: 8px;
+             max-height: 300px;
+             overflow-y: auto;
+             z-index: 1000;
+             opacity: 0;
+             visibility: hidden;
+             transform: translateY(-10px) scale(0.95);
+             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+         }
+
+         .custom-select.active .select-options {
+             opacity: 1;
+             visibility: visible;
+             transform: translateY(0) scale(1);
+         }
+
+         .custom-select .select-option {
+             padding: 14px 20px;
+             cursor: pointer;
+             transition: all 0.2s ease;
+             color: var(--text-primary);
+             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+             font-weight: 500;
+         }
+
+         .custom-select .select-option:last-child {
+             border-bottom: none;
+         }
+
+         .custom-select .select-option:hover {
+             background: rgba(102, 126, 234, 0.1);
+             color: #667eea;
+             padding-left: 25px;
+         }
+
+         .custom-select .select-option.selected {
+             background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+             color: #667eea;
+             font-weight: 600;
+         }
+
+         /* Hide original select */
+         .form-input[type="select"],
+         select.form-input {
+             display: none;
+         }
+
+        /* File Upload */
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 2rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .upload-text {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .image-preview {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .preview-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .remove-image {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--danger-gradient);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Loading */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+                 @keyframes spin {
+             0% { transform: rotate(0deg); }
+             100% { transform: rotate(360deg); }
+         }
+
+         /* Notification Styles */
+         .notification {
+             position: fixed;
+             top: 20px;
+             right: 20px;
+             padding: 16px 24px;
+             border-radius: 12px;
+             color: white;
+             font-weight: 500;
+             z-index: 10001;
+             transform: translateX(100%);
+             opacity: 0;
+             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+             backdrop-filter: blur(20px);
+             display: flex;
+             align-items: center;
+             gap: 12px;
+             max-width: 400px;
+         }
+
+         .notification.show {
+             transform: translateX(0);
+             opacity: 1;
+         }
+
+         .notification.success {
+             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+         }
+
+         .notification.error {
+             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+         }
+
+         .notification.info {
+             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+         }
+
+         .notification-icon {
+             font-size: 1.2rem;
+         }
+
+         /* Custom Alert Modal */
+         .alert-modal {
+             display: none;
+             position: fixed;
+             z-index: 10002;
+             left: 0;
+             top: 0;
+             width: 100%;
+             height: 100%;
+             background-color: rgba(0, 0, 0, 0.6);
+             backdrop-filter: blur(10px);
+         }
+
+         .alert-modal-content {
+             position: absolute;
+             top: 50%;
+             left: 50%;
+             transform: translate(-50%, -50%);
+             background: var(--surface);
+             backdrop-filter: blur(20px);
+             padding: 0;
+             border-radius: 20px;
+             width: 90%;
+             max-width: 450px;
+             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+             overflow: hidden;
+         }
+
+         .alert-modal-header {
+             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+             color: white;
+             padding: 20px 24px;
+             text-align: center;
+         }
+
+         .alert-modal-header.success {
+             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+         }
+
+         .alert-modal-header.error {
+             background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+         }
+
+         .alert-modal-icon {
+             font-size: 2.5rem;
+             margin-bottom: 10px;
+         }
+
+         .alert-modal-title {
+             font-size: 1.3rem;
+             font-weight: 700;
+             margin: 0;
+         }
+
+         .alert-modal-body {
+             padding: 24px;
+             text-align: center;
+             color: var(--text-primary);
+             line-height: 1.6;
+         }
+
+         .alert-modal-footer {
+             padding: 24px;
+             text-align: center;
+             border-top: 1px solid var(--border);
+         }
+
+         .alert-btn {
+             padding: 12px 32px;
+             border: none;
+             border-radius: 12px;
+             font-weight: 600;
+             cursor: pointer;
+             transition: all 0.3s ease;
+             font-size: 1rem;
+         }
+
+         .alert-btn-primary {
+             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+             color: white;
+         }
+
+         .alert-btn-success {
+             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+             color: white;
+         }
+
+         .alert-btn:hover {
+             transform: translateY(-2px);
+             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+         }
+
+         /* Form Section Styles */
+         .form-section {
+             margin: 32px 0;
+             padding: 24px;
+             background: rgba(255, 255, 255, 0.03);
+             border: 1px solid var(--border);
+             border-radius: 16px;
+             backdrop-filter: blur(10px);
+         }
+
+         .form-section-title {
+             font-size: 1.2rem;
+             font-weight: 700;
+             color: var(--text-primary);
+             margin: 0 0 20px 0;
+             display: flex;
+             align-items: center;
+             gap: 12px;
+         }
+
+         .form-section-title i {
+             background: var(--primary-gradient);
+             -webkit-background-clip: text;
+             -webkit-text-fill-color: transparent;
+             background-clip: text;
+             font-size: 1.3rem;
+         }
+
+         /* Responsive */
+        @media (max-width: 768px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .objects-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-nav {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <a href="/" class="logo">
+                    <svg class="logo-icon" viewBox="0 0 32 32" width="28" height="28">
+                        <defs>
+                            <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" style="stop-color:#2563eb"/>
+                                <stop offset="100%" style="stop-color:#1d4ed8"/>
+                            </linearGradient>
+                        </defs>
+                        <path fill="url(#logoGradient)" d="M16 2L4 12v16a2 2 0 0 0 2 2h6V20h8v10h6a2 2 0 0 0 2-2V12L16 2z"/>
+                        <circle fill="#60a5fa" cx="16" cy="14" r="3"/>
+                    </svg>
+                    CityAR Admin
+                </a>
+                <div class="admin-info">
+                    <span id="userInfo">Администратор</span>
+                    <a href="/" class="btn btn-secondary">
+                        <i class="fas fa-home"></i>
+                        На сайт
+                    </a>
+                    <button onclick="logout()" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Выйти
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <nav class="admin-nav">
+                <button class="nav-tab active" onclick="showSection('objects')">
+                    <i class="fas fa-home"></i>
+                    Объекты недвижимости
+                </button>
+                <button class="nav-tab" onclick="showSection('requests')">
+                    <i class="fas fa-envelope"></i>
+                    Заявки
+                </button>
+            </nav>
+
+            <!-- Objects Section -->
+            <div id="objects-section" class="content-section active">
+                <div class="section-header">
+                    <h1 class="section-title">Управление объектами</h1>
+                    <button class="btn btn-success" onclick="openObjectModal()">
+                        <i class="fas fa-plus"></i>
+                        Добавить объект
+                    </button>
+                </div>
+                
+                <div class="loading" id="objectsLoading">
+                    <div class="spinner"></div>
+                    <p>Загрузка объектов...</p>
+                </div>
+                
+                <div class="objects-grid" id="objectsGrid">
+                    <!-- Objects will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Requests Section -->
+            <div id="requests-section" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">Заявки клиентов</h1>
+                </div>
+                
+                <div id="requestsList">
+                    <!-- Requests will be loaded here -->
+                </div>
+            </div>
+
+
+        </div>
+    </main>
+
+    <!-- Object Modal -->
+    <div id="objectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Добавить объект</h2>
+                <span class="close" onclick="closeObjectModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="objectForm">
+                    <input type="hidden" id="objectId">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label class="form-label" for="title">Название *</label>
+                            <input type="text" id="title" class="form-input" placeholder="Введите название объекта" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Тип *</label>
+                            <div class="custom-select" data-target="type">
+                                <div class="select-display">
+                                    <span class="select-text">Выберите тип</span>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                                <div class="select-options">
+                                    <div class="select-option" data-value="">Выберите тип</div>
+                                    <div class="select-option" data-value="Квартира">🏠 Квартира</div>
+                                    <div class="select-option" data-value="Студия">🏙️ Студия</div>
+                                    <div class="select-option" data-value="Дом">🏡 Дом</div>
+                                    <div class="select-option" data-value="Коммерческая">🏢 Коммерческая</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="type" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="price">Цена (₽) *</label>
+                            <input type="number" id="price" class="form-input" placeholder="Например: 12500000" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="area">Площадь (м²)</label>
+                            <input type="number" step="0.1" id="area" class="form-input" placeholder="Например: 65.5">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="rooms">Комнат</label>
+                            <input type="number" id="rooms" class="form-input" placeholder="Например: 2">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="floor">Этаж</label>
+                            <input type="number" id="floor" class="form-input" placeholder="Например: 5">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="maxFloor">Этажей в доме</label>
+                            <input type="number" id="maxFloor" class="form-input" placeholder="Например: 12">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Статус</label>
+                            <div class="custom-select" data-target="status">
+                                <div class="select-display">
+                                    <span class="select-text">Активный</span>
+                                    <i class="fas fa-chevron-down select-arrow"></i>
+                                </div>
+                                <div class="select-options">
+                                    <div class="select-option selected" data-value="active">✅ Активный</div>
+                                    <div class="select-option" data-value="inactive">❌ Неактивный</div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="status" value="active">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label" for="location">Адрес *</label>
+                            <input type="text" id="location" class="form-input" placeholder="Например: ул. Таганская, 15" required>
+                        </div>
+                        
+
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="nearestMetro">Ближайшее метро</label>
+                            <input type="text" id="nearestMetro" class="form-input" placeholder="Например: Таганская">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="metroDistance">Время до метро (мин)</label>
+                            <input type="number" id="metroDistance" class="form-input" placeholder="Например: 5">
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label" for="description">Описание</label>
+                            <textarea id="description" class="form-input form-textarea" placeholder="Детальное описание объекта, его особенности, преимущества..."></textarea>
+                        </div>
+
+                        <!-- Характеристики квартиры -->
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="fas fa-home"></i>
+                                Характеристики квартиры
+                            </h3>
+
+                            <div class="form-group">
+                                <label class="form-label" for="livingArea">Жилая площадь (м²)</label>
+                                <input type="number" id="livingArea" class="form-input" step="0.1" placeholder="19.3">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="kitchenArea">Площадь кухни (м²)</label>
+                                <input type="number" id="kitchenArea" class="form-input" step="0.1" placeholder="6">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Тип жилья</label>
+                                <div class="custom-select" data-target="apartmentType">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип</div>
+                                        <div class="select-option" data-value="Новостройка">🏗️ Новостройка</div>
+                                        <div class="select-option" data-value="Вторичка">🏠 Вторичка</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="apartmentType" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Ремонт</label>
+                                <div class="custom-select" data-target="repairType">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип ремонта</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип ремонта</div>
+                                        <div class="select-option" data-value="Без ремонта">⚒️ Без ремонта</div>
+                                        <div class="select-option" data-value="Косметический">🎨 Косметический</div>
+                                        <div class="select-option" data-value="Евроремонт">✨ Евроремонт</div>
+                                        <div class="select-option" data-value="Дизайнерский">🏆 Дизайнерский</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="repairType" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="bathroomCount">Количество санузлов</label>
+                                <input type="number" id="bathroomCount" class="form-input" min="1" placeholder="1">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Тип санузла</label>
+                                <div class="custom-select" data-target="bathroomType">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип</div>
+                                        <div class="select-option" data-value="Совмещенный">🚿 Совмещенный</div>
+                                        <div class="select-option" data-value="Раздельный">🚪 Раздельный</div>
+                                        <div class="select-option" data-value="Несколько">🚻 Несколько</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="bathroomType" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="balconyCount">Количество балконов</label>
+                                <input type="number" id="balconyCount" class="form-input" min="0" placeholder="1">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Тип балкона</label>
+                                <div class="custom-select" data-target="balconyType">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип</div>
+                                        <div class="select-option" data-value="Нет">❌ Нет</div>
+                                        <div class="select-option" data-value="Балкон">🪟 Балкон</div>
+                                        <div class="select-option" data-value="Лоджия">🏢 Лоджия</div>
+                                        <div class="select-option" data-value="Балкон и лоджия">🪟🏢 Балкон и лоджия</div>
+                                        <div class="select-option" data-value="Терраса">🌿 Терраса</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="balconyType" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Вид из окон</label>
+                                <div class="custom-select" data-target="windowView">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите вид</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите вид</div>
+                                        <div class="select-option" data-value="Во двор">🏘️ Во двор</div>
+                                        <div class="select-option" data-value="На улицу">🛣️ На улицу</div>
+                                        <div class="select-option" data-value="На улицу и двор">🌆 На улицу и двор</div>
+                                        <div class="select-option" data-value="На парк">🌳 На парк</div>
+                                        <div class="select-option" data-value="На водоем">🌊 На водоем</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="windowView" value="">
+                            </div>
+                        </div>
+
+                        <!-- Характеристики дома -->
+                        <div class="form-section">
+                            <h3 class="form-section-title">
+                                <i class="fas fa-building"></i>
+                                Характеристики дома
+                            </h3>
+
+                            <div class="form-group">
+                                <label class="form-label" for="buildingYear">Год постройки</label>
+                                <input type="number" id="buildingYear" class="form-input" min="1900" max="2030" placeholder="1985">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Тип дома</label>
+                                <div class="custom-select" data-target="buildingType">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип</div>
+                                        <div class="select-option" data-value="Кирпичный">🧱 Кирпичный</div>
+                                        <div class="select-option" data-value="Панельный">🏢 Панельный</div>
+                                        <div class="select-option" data-value="Монолитный">🏗️ Монолитный</div>
+                                        <div class="select-option" data-value="Деревянный">🌲 Деревянный</div>
+                                        <div class="select-option" data-value="Сталинский">🏛️ Сталинский</div>
+                                        <div class="select-option" data-value="Блочный">🔲 Блочный</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="buildingType" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Парковка</label>
+                                <div class="custom-select" data-target="parkingType">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип</div>
+                                        <div class="select-option" data-value="Нет">❌ Нет</div>
+                                        <div class="select-option" data-value="Во дворе">🏘️ Во дворе</div>
+                                        <div class="select-option" data-value="Наземная">🅿️ Наземная</div>
+                                        <div class="select-option" data-value="Подземная">🚇 Подземная</div>
+                                        <div class="select-option" data-value="Многоуровневая">🏗️ Многоуровневая</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="parkingType" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Отопление</label>
+                                <div class="custom-select" data-target="heatingType">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип</div>
+                                        <div class="select-option" data-value="Центральное">🏢 Центральное</div>
+                                        <div class="select-option" data-value="Автономное">🏠 Автономное</div>
+                                        <div class="select-option" data-value="Индивидуальное">⚡ Индивидуальное</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="heatingType" value="">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label">Газоснабжение</label>
+                                <div class="custom-select" data-target="gasSupply">
+                                    <div class="select-display">
+                                        <span class="select-text">Выберите тип</span>
+                                        <i class="fas fa-chevron-down select-arrow"></i>
+                                    </div>
+                                    <div class="select-options">
+                                        <div class="select-option selected" data-value="">Выберите тип</div>
+                                        <div class="select-option" data-value="Центральное">🏢 Центральное</div>
+                                        <div class="select-option" data-value="Баллонный">🛢️ Баллонный</div>
+                                        <div class="select-option" data-value="Нет">❌ Нет</div>
+                                    </div>
+                                </div>
+                                <input type="hidden" id="gasSupply" value="">
+                            </div>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label class="form-label">Фотографии</label>
+                            <div class="file-upload-area" onclick="document.getElementById('imageInput').click()">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <div class="upload-text">Нажмите или перетащите файлы сюда</div>
+                                <div style="font-size: 0.9rem; color: var(--text-secondary);">
+                                    Поддерживаются: JPG, PNG, WebP (до 5MB)
+                                </div>
+                            </div>
+                            <input type="file" id="imageInput" class="file-input" multiple accept="image/*">
+                            <div class="image-preview" id="imagePreview"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+                        <button type="button" class="btn btn-secondary" onclick="closeObjectModal()">
+                            Отмена
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i>
+                            Сохранить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Modal -->
+    <div id="alertModal" class="alert-modal">
+        <div class="alert-modal-content">
+            <div class="alert-modal-header" id="alertModalHeader">
+                <div class="alert-modal-icon" id="alertModalIcon">
+                    <i class="fas fa-info-circle"></i>
+                </div>
+                <h3 class="alert-modal-title" id="alertModalTitle">Уведомление</h3>
+            </div>
+            <div class="alert-modal-body" id="alertModalBody">
+                Сообщение
+            </div>
+            <div class="alert-modal-footer">
+                <button class="alert-btn alert-btn-primary" onclick="closeAlertModal()">
+                    <i class="fas fa-check"></i>
+                    Понятно
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentImages = [];
+        let editingObjectId = null;
+
+        // Notification functions
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-circle',
+                info: 'fas fa-info-circle'
+            };
+            
+            notification.innerHTML = `
+                <i class="${icons[type]} notification-icon"></i>
+                <span>${message}</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Trigger animation
+            setTimeout(() => notification.classList.add('show'), 10);
+            
+            // Auto remove
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 400);
+            }, 3000);
+        }
+
+        function showAlert(message, type = 'info', title = null) {
+            const modal = document.getElementById('alertModal');
+            const header = document.getElementById('alertModalHeader');
+            const icon = document.getElementById('alertModalIcon');
+            const titleEl = document.getElementById('alertModalTitle');
+            const body = document.getElementById('alertModalBody');
+            
+            // Set type-specific styles
+            header.className = `alert-modal-header ${type}`;
+            
+            const icons = {
+                success: 'fas fa-check-circle',
+                error: 'fas fa-exclamation-triangle',
+                info: 'fas fa-info-circle'
+            };
+            
+            const titles = {
+                success: 'Успешно',
+                error: 'Ошибка',
+                info: 'Информация'
+            };
+            
+            icon.innerHTML = `<i class="${icons[type]}"></i>`;
+            titleEl.textContent = title || titles[type];
+            body.textContent = message;
+            
+            modal.style.display = 'block';
+        }
+
+        function closeAlertModal() {
+            document.getElementById('alertModal').style.display = 'none';
+        }
+
+        // Close alert modal on outside click
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('alertModal');
+            if (e.target === modal) {
+                closeAlertModal();
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadObjects();
+            initializeCustomSelects();
+            
+            // File upload handlers
+            const fileInput = document.getElementById('imageInput');
+            const uploadArea = document.querySelector('.file-upload-area');
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            
+            // Drag and drop
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                handleFiles(files);
+            });
+            
+            // Form submit
+            document.getElementById('objectForm').addEventListener('submit', handleFormSubmit);
+        });
+
+        function initializeCustomSelects() {
+            const customSelects = document.querySelectorAll('.custom-select');
+            
+            customSelects.forEach(select => {
+                const display = select.querySelector('.select-display');
+                const options = select.querySelector('.select-options');
+                const hiddenInput = document.getElementById(select.dataset.target);
+                
+                // Toggle dropdown
+                display.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Close other selects
+                    customSelects.forEach(otherSelect => {
+                        if (otherSelect !== select) {
+                            otherSelect.classList.remove('active');
+                        }
+                    });
+                    
+                    select.classList.toggle('active');
+                });
+                
+                // Handle option selection
+                options.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('select-option')) {
+                        const value = e.target.dataset.value;
+                        const text = e.target.textContent;
+                        
+                        // Update hidden input
+                        hiddenInput.value = value;
+                        
+                        // Update display
+                        display.querySelector('.select-text').textContent = text;
+                        
+                        // Update selected state
+                        options.querySelectorAll('.select-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        e.target.classList.add('selected');
+                        
+                        // Close dropdown
+                        select.classList.remove('active');
+                    }
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                customSelects.forEach(select => {
+                    select.classList.remove('active');
+                });
+            });
+        }
+
+        function setCustomSelectValue(target, value) {
+            const select = document.querySelector(`[data-target="${target}"]`);
+            if (!select) return;
+            
+            const hiddenInput = document.getElementById(target);
+            const display = select.querySelector('.select-display .select-text');
+            const options = select.querySelectorAll('.select-option');
+            
+            hiddenInput.value = value;
+            
+            options.forEach(option => {
+                option.classList.remove('selected');
+                if (option.dataset.value === value) {
+                    option.classList.add('selected');
+                    display.textContent = option.textContent;
+                }
+            });
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('adminUser') || localStorage.getItem('user') || '{}');
+            
+            console.log('Проверка авторизации:', { 
+                token: token ? 'найден' : 'не найден', 
+                userRole: user.role,
+                userName: user.name 
+            });
+            
+            if (!token || user.role !== 'admin') {
+                console.log('Перенаправление на главную: нет токена или не админ');
+                window.location.href = '/';
+                return;
+            }
+            
+            document.getElementById('userInfo').textContent = user.name || user.email || 'Администратор';
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('adminToken');
+            localStorage.removeItem('user');
+            localStorage.removeItem('adminUser');
+            window.location.href = '/';
+        }
+
+
+
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            
+            // Show selected section
+            document.getElementById(section + '-section').classList.add('active');
+            event.target.classList.add('active');
+            
+            // Load section data
+            if (section === 'objects') {
+                loadObjects();
+            } else if (section === 'requests') {
+                console.log('Переходим к заявкам, проверяем токен...');
+                const token = localStorage.getItem('adminToken');
+                if (!token) {
+                    showAlert('Необходимо войти в систему', 'error');
+                    return;
+                }
+                loadRequests();
+            } else if (section === 'stats') {
+                loadStats();
+            }
+        }
+
+        async function loadObjects() {
+            const loading = document.getElementById('objectsLoading');
+            const grid = document.getElementById('objectsGrid');
+            
+            loading.style.display = 'block';
+            grid.innerHTML = '';
+            
+            try {
+                const response = await fetch('/api/admin/objects', {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки объектов');
+                }
+                
+                const objects = await response.json();
+                displayObjects(objects);
+            } catch (error) {
+                console.error('Ошибка:', error);
+                grid.innerHTML = '<p>Ошибка загрузки объектов</p>';
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayObjects(objects) {
+            const grid = document.getElementById('objectsGrid');
+            
+            if (objects.length === 0) {
+                grid.innerHTML = '<p>Нет объектов</p>';
+                return;
+            }
+            
+            grid.innerHTML = objects.map(obj => `
+                <div class="object-card">
+                    <div class="object-image" style="background-image: url('${getFirstImage(obj.images)}')">
+                        <div class="object-status ${obj.status === 'active' ? 'status-active' : 'status-inactive'}">
+                            ${obj.status === 'active' ? 'Активный' : 'Неактивный'}
+                        </div>
+                    </div>
+                    <div class="object-info">
+                        <div class="object-title">${obj.title}</div>
+                        <div class="object-price">${formatPrice(obj.price)}</div>
+                        <div class="object-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            ${obj.location}
+                        </div>
+                        <div class="object-actions">
+                            <button class="btn btn-primary btn-small" onclick="editObject(${obj.id})">
+                                <i class="fas fa-edit"></i>
+                                Изменить
+                            </button>
+                            <button class="btn btn-danger btn-small" onclick="deleteObject(${obj.id})">
+                                <i class="fas fa-trash"></i>
+                                Удалить
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getFirstImage(images) {
+            if (images && images.length > 0) {
+                return images[0];
+            }
+            return 'https://via.placeholder.com/300x200?text=Нет+фото';
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('ru-RU', {
+                style: 'currency',
+                currency: 'RUB',
+                minimumFractionDigits: 0
+            }).format(price);
+        }
+
+        function openObjectModal(objectId = null) {
+            editingObjectId = objectId;
+            const modal = document.getElementById('objectModal');
+            const title = document.getElementById('modalTitle');
+            
+            if (objectId) {
+                title.textContent = 'Редактировать объект';
+                loadObjectData(objectId);
+            } else {
+                title.textContent = 'Добавить объект';
+                clearForm();
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeObjectModal() {
+            document.getElementById('objectModal').style.display = 'none';
+            clearForm();
+            currentImages = [];
+            editingObjectId = null;
+        }
+
+        function clearForm() {
+            document.getElementById('objectForm').reset();
+            document.getElementById('imagePreview').innerHTML = '';
+            currentImages = [];
+            
+            // Reset custom selects
+            setCustomSelectValue('type', '');
+            setCustomSelectValue('status', 'active');
+            
+            // Reset new characteristics selects
+            setCustomSelectValue('buildingType', '');
+            setCustomSelectValue('apartmentType', '');
+            setCustomSelectValue('bathroomType', '');
+            setCustomSelectValue('balconyType', '');
+            setCustomSelectValue('repairType', '');
+            setCustomSelectValue('windowView', '');
+            setCustomSelectValue('parkingType', '');
+            setCustomSelectValue('heatingType', '');
+            setCustomSelectValue('gasSupply', '');
+        }
+
+        async function loadObjectData(objectId) {
+            try {
+                const response = await fetch(`/api/admin/objects`, {
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки объекта');
+                }
+                
+                const objects = await response.json();
+                const object = objects.find(obj => obj.id == objectId);
+                
+                if (object) {
+                    // Fill form fields
+                    document.getElementById('objectId').value = object.id;
+                    document.getElementById('title').value = object.title || '';
+                    document.getElementById('price').value = object.price || '';
+                    document.getElementById('area').value = object.area || '';
+                    document.getElementById('rooms').value = object.rooms || '';
+                    document.getElementById('floor').value = object.floor || '';
+                    document.getElementById('maxFloor').value = object.max_floor || '';
+                                     document.getElementById('location').value = object.location || '';
+                 document.getElementById('description').value = object.description || '';
+                 document.getElementById('nearestMetro').value = object.nearest_metro || '';
+                    document.getElementById('metroDistance').value = object.metro_distance_minutes || '';
+                    
+                    // Set custom select values
+                    setCustomSelectValue('type', object.type || '');
+                    setCustomSelectValue('status', object.status || 'active');
+                    
+                    // Fill new characteristics fields
+                    document.getElementById('livingArea').value = object.living_area || '';
+                    document.getElementById('kitchenArea').value = object.kitchen_area || '';
+                    document.getElementById('buildingYear').value = object.building_year || '';
+                    document.getElementById('bathroomCount').value = object.bathroom_count || '';
+                    document.getElementById('balconyCount').value = object.balcony_count || '';
+                    
+                    // Set new custom select values
+                    setCustomSelectValue('buildingType', object.building_type || '');
+                    setCustomSelectValue('apartmentType', object.apartment_type || '');
+                    setCustomSelectValue('bathroomType', object.bathroom_type || '');
+                    setCustomSelectValue('balconyType', object.balcony_type || '');
+                    setCustomSelectValue('repairType', object.repair_type || '');
+                    setCustomSelectValue('windowView', object.window_view || '');
+                    setCustomSelectValue('parkingType', object.parking_type || '');
+                    setCustomSelectValue('heatingType', object.heating_type || '');
+                    setCustomSelectValue('gasSupply', object.gas_supply || '');
+                    
+                    // Load images
+                    currentImages = object.images || [];
+                    displayImagePreview();
+                }
+                         } catch (error) {
+                 console.error('Ошибка загрузки объекта:', error);
+                 showAlert('Ошибка загрузки данных объекта', 'error');
+             }
+        }
+
+        function handleFileSelect(e) {
+            handleFiles(e.target.files);
+        }
+
+        async function handleFiles(files) {
+            const validFiles = Array.from(files).filter(file => file.type.startsWith('image/'));
+            
+                         if (validFiles.length === 0) {
+                 showAlert('Выберите файлы изображений', 'error');
+                 return;
+             }
+            
+            const formData = new FormData();
+            validFiles.forEach(file => {
+                formData.append('images', file);
+            });
+            
+            try {
+                const response = await fetch('/api/admin/upload', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Ошибка загрузки файлов');
+                }
+                
+                const result = await response.json();
+                currentImages.push(...result.urls);
+                displayImagePreview();
+                         } catch (error) {
+                 console.error('Ошибка загрузки:', error);
+                 showAlert('Ошибка загрузки файлов', 'error');
+             }
+        }
+
+        function displayImagePreview() {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = currentImages.map((url, index) => `
+                <div class="preview-item">
+                    <img src="${url}" class="preview-image" alt="Preview">
+                    <button type="button" class="remove-image" onclick="removeImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function removeImage(index) {
+            currentImages.splice(index, 1);
+            displayImagePreview();
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            
+                         const formData = {
+                 title: document.getElementById('title').value.trim(),
+                 type: document.getElementById('type').value,
+                 price: parseFloat(document.getElementById('price').value),
+                 area: parseFloat(document.getElementById('area').value) || null,
+                 rooms: parseInt(document.getElementById('rooms').value) || null,
+                 floor: parseInt(document.getElementById('floor').value) || null,
+                 max_floor: parseInt(document.getElementById('maxFloor').value) || null,
+                 location: document.getElementById('location').value.trim(),
+                 description: document.getElementById('description').value.trim(),
+                 nearest_metro: document.getElementById('nearestMetro').value.trim(),
+                 metro_distance_minutes: parseInt(document.getElementById('metroDistance').value) || null,
+                 status: document.getElementById('status').value,
+                 images: currentImages,
+                 // Новые характеристики
+                 living_area: parseFloat(document.getElementById('livingArea').value) || null,
+                 kitchen_area: parseFloat(document.getElementById('kitchenArea').value) || null,
+                 building_year: parseInt(document.getElementById('buildingYear').value) || null,
+                 building_type: document.getElementById('buildingType').value || null,
+                 apartment_type: document.getElementById('apartmentType').value || null,
+                 bathroom_count: parseInt(document.getElementById('bathroomCount').value) || null,
+                 bathroom_type: document.getElementById('bathroomType').value || null,
+                 balcony_count: parseInt(document.getElementById('balconyCount').value) || null,
+                 balcony_type: document.getElementById('balconyType').value || null,
+                 repair_type: document.getElementById('repairType').value || null,
+                 window_view: document.getElementById('windowView').value || null,
+                 parking_type: document.getElementById('parkingType').value || null,
+                 heating_type: document.getElementById('heatingType').value || null,
+                 gas_supply: document.getElementById('gasSupply').value || null
+             };
+             
+                          console.log('Form data being sent:', formData);
+             
+             // Validation
+             if (!formData.title || !formData.type || !formData.price || !formData.location) {
+                 showAlert('Заполните все обязательные поля (название, тип, цена, адрес)', 'error');
+                 return;
+             }
+             
+             try {
+                const url = editingObjectId 
+                    ? `/api/admin/objects/${editingObjectId}`
+                    : '/api/admin/objects';
+                    
+                const method = editingObjectId ? 'PUT' : 'POST';
+                
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                                 if (!response.ok) {
+                     const error = await response.json();
+                     console.error('Server error:', error);
+                     throw new Error(error.error || `Ошибка сохранения (${response.status})`);
+                 }
+                 
+                 const result = await response.json();
+                 console.log('Save result:', result);
+                
+                                 showNotification(editingObjectId ? 'Объект успешно обновлен!' : 'Объект успешно создан!', 'success');
+                 closeObjectModal();
+                 // Обновляем список объектов для синхронизации статусов
+                 await loadObjects();
+             } catch (error) {
+                 console.error('Ошибка:', error);
+                 showAlert('Ошибка: ' + error.message, 'error');
+             }
+        }
+
+        async function editObject(id) {
+            openObjectModal(id);
+        }
+
+                 async function deleteObject(id) {
+             // Create custom confirm dialog
+             const modal = document.createElement('div');
+             modal.className = 'alert-modal';
+             modal.style.display = 'block';
+             modal.innerHTML = `
+                 <div class="alert-modal-content">
+                     <div class="alert-modal-header error">
+                         <div class="alert-modal-icon">
+                             <i class="fas fa-exclamation-triangle"></i>
+                         </div>
+                         <h3 class="alert-modal-title">Подтверждение удаления</h3>
+                     </div>
+                     <div class="alert-modal-body">
+                         Вы уверены, что хотите удалить этот объект?<br>
+                         <strong>Это действие нельзя отменить.</strong>
+                     </div>
+                     <div class="alert-modal-footer" style="display: flex; gap: 12px; justify-content: center;">
+                         <button class="alert-btn" style="background: #6b7280; color: white;" onclick="document.body.removeChild(this.closest('.alert-modal'))">
+                             <i class="fas fa-times"></i>
+                             Отмена
+                         </button>
+                         <button class="alert-btn" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white;" onclick="confirmDelete(${id}); document.body.removeChild(this.closest('.alert-modal'))">
+                             <i class="fas fa-trash"></i>
+                             Удалить
+                         </button>
+                     </div>
+                 </div>
+             `;
+             document.body.appendChild(modal);
+         }
+         
+         async function confirmDelete(id) {
+             try {
+                 const response = await fetch(`/api/admin/objects/${id}`, {
+                     method: 'DELETE',
+                     headers: {
+                         'Authorization': 'Bearer ' + localStorage.getItem('token')
+                     }
+                 });
+                 
+                 if (!response.ok) {
+                     throw new Error('Ошибка удаления объекта');
+                 }
+                 
+                 showNotification('Объект успешно удален!', 'success');
+                 await loadObjects();
+             } catch (error) {
+                 console.error('Ошибка:', error);
+                 showAlert('Ошибка удаления объекта', 'error');
+             }
+         }
+
+        // Load requests function
+        async function loadRequests() {
+            try {
+                const token = localStorage.getItem('adminToken');
+                if (!token) {
+                    throw new Error('Токен авторизации не найден');
+                }
+
+                const response = await fetch('/api/admin/requests', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('adminToken');
+                    window.location.href = '/admin.html';
+                    return;
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const requests = await response.json();
+                console.log('Загружено заявок:', requests.length);
+                const requestsList = document.getElementById('requestsList');
+
+                if (requests.length === 0) {
+                    requestsList.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox" style="font-size: 3rem; color: var(--text-secondary); margin-bottom: 1rem;"></i>
+                            <p style="color: var(--text-secondary); font-size: 1.1rem;">Заявок пока нет</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                requestsList.innerHTML = requests.map(request => `
+                    <div class="request-card">
+                        <div class="request-header">
+                            <div class="request-info">
+                                <h3>${request.user_name || request.name || 'Клиент'}</h3>
+                                <span class="request-date">${new Date(request.created_at).toLocaleString('ru-RU')}</span>
+                            </div>
+                            <div class="request-status status-${request.status}">
+                                ${request.status === 'new' ? 'Новая' : 
+                                  request.status === 'in_progress' ? 'В работе' : 
+                                  request.status === 'completed' ? 'Выполнена' : 'Отклонена'}
+                            </div>
+                        </div>
+                        
+                        <div class="request-content">
+                            <div class="request-contacts">
+                                <div class="contact-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span>${request.phone}</span>
+                                </div>
+                                <div class="contact-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>${request.email}</span>
+                                </div>
+                            </div>
+                            
+                            ${request.object_title ? `
+                                <div class="request-object">
+                                    <i class="fas fa-home"></i>
+                                    <div>
+                                        <strong>${request.object_title}</strong>
+                                        <div style="color: var(--text-secondary); font-size: 0.9rem;">
+                                            ${request.object_location} • ${Number(request.object_price).toLocaleString('ru-RU')} ₽
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : ''}
+                            
+                            <div class="request-message">
+                                <strong>Сообщение:</strong>
+                                <p>${request.message}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="request-actions">
+                            <button class="btn-small btn-primary" onclick="updateRequestStatus(${request.id}, 'in_progress')">
+                                <i class="fas fa-clock"></i> В работу
+                            </button>
+                            <button class="btn-small btn-success" onclick="updateRequestStatus(${request.id}, 'completed')">
+                                <i class="fas fa-check"></i> Выполнена
+                            </button>
+                            <button class="btn-small btn-danger" onclick="updateRequestStatus(${request.id}, 'rejected')">
+                                <i class="fas fa-times"></i> Отклонить
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+
+            } catch (error) {
+                console.error('Ошибка загрузки заявок:', error);
+                document.getElementById('requestsList').innerHTML = `
+                    <div class="error-state">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 2rem; color: #ff6b6b; margin-bottom: 1rem;"></i>
+                        <p style="color: #ff6b6b;">Ошибка загрузки заявок: ${error.message}</p>
+                        ${error.message.includes('авторизации') ? `
+                            <button class="btn btn-primary" onclick="window.location.reload()" style="margin-top: 1rem;">
+                                <i class="fas fa-refresh"></i> Обновить страницу
+                            </button>
+                        ` : ''}
+                    </div>
+                `;
+            }
+        }
+
+        function loadStats() {
+            // Implementation will be added later
+            document.getElementById('statsContent').innerHTML = '<p>Раздел статистики в разработке</p>';
+        }
+
+        // Update request status
+        async function updateRequestStatus(requestId, newStatus) {
+            try {
+                const token = localStorage.getItem('adminToken');
+                const response = await fetch(`/api/admin/requests/${requestId}/status`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка обновления статуса');
+                }
+
+                showNotification('Статус заявки обновлен', 'success');
+                loadRequests(); // Перезагружаем список заявок
+            } catch (error) {
+                console.error('Ошибка обновления статуса заявки:', error);
+                showAlert('Ошибка обновления статуса заявки: ' + error.message, 'error');
+            }
+        }
+    </script>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <h3>CityAR Admin</h3>
+                    <p>Панель управления недвижимостью</p>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-vk"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Управление</h4>
+                <ul class="footer-links">
+                    <li><a href="#" onclick="showSection('objects')">Объекты</a></li>
+                    <li><a href="#" onclick="showSection('requests')">Заявки</a></li>
+                    <li><a href="/">Главная страница</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <div class="footer-contact">
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <a href="tel:+79266124929">+7 (926) 612-49-29</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:admin@cityar.ru">admin@cityar.ru</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <div class="footer-copyright">
+                    <p>&copy; 2024 CityAR Admin Panel. Все права защищены.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+        /* Footer Styles */
+        .site-footer {
+            background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+            color: white;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="none"><path d="M0,20 Q250,80 500,20 T1000,20 V100 H0 Z" fill="rgba(255,255,255,0.05)"/></svg>') no-repeat;
+            background-size: cover;
+        }
+
+        .footer-content {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-section h3,
+        .footer-section h4 {
+            font-family: 'Manrope', sans-serif;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-logo h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #f0f9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .footer-logo p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .contact-item i {
+            color: #60a5fa;
+            width: 16px;
+            margin-top: 2px;
+        }
+
+        .contact-item a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-bottom-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px 20px;
+            text-align: center;
+        }
+
+        .footer-copyright p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 40px 20px 30px;
+            }
+        }
+    </style>
+</body>
+</html> 

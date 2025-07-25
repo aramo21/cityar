@@ -1,0 +1,3038 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CityAR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-gradient: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            --neutral-gradient: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+            --dark-gradient: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+            --surface: rgba(255, 255, 255, 0.95);
+            --surface-dark: rgba(255, 255, 255, 0.1);
+            --text-primary: #1a1a1a;
+            --text-secondary: #6b7280;
+            --border: rgba(255, 255, 255, 0.2);
+            --shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 30px 80px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: 
+                linear-gradient(135deg, rgba(37, 99, 235, 0.9) 0%, rgba(29, 78, 216, 0.9) 100%),
+                url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?q=80&w=2073&auto=format&fit=crop&ixlib=rb-4.0.3') center/cover no-repeat;
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            backdrop-filter: blur(20px);
+            background: var(--surface);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 80px;
+        }
+
+        .logo {
+            font-family: 'Manrope', sans-serif;
+            font-size: 28px;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-icon {
+            transition: all 0.3s ease;
+        }
+
+        .logo:hover .logo-icon {
+            transform: rotate(5deg) scale(1.1);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn-outline {
+            padding: 12px 24px;
+            border: 2px solid transparent;
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-outline:hover {
+            border-color: var(--border);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary {
+            padding: 12px 24px;
+            background: var(--primary-gradient);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .user-menu {
+            position: relative;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background: var(--surface-dark);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .user-name-display {
+            color: var(--text-primary);
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .dropdown-header {
+            padding: 15px 20px 10px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 5px;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 60px;
+            right: 0;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            min-width: 200px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item:hover {
+            background: var(--surface-dark);
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            color: var(--text-secondary);
+        }
+
+        main {
+            margin-top: 80px;
+            padding: 40px 0 60px 0;
+        }
+
+        .hero {
+            background: var(--dark-gradient);
+            color: white;
+            text-align: center;
+            padding: 80px 0 40px 0;
+            margin-bottom: 40px;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 20px 0;
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            margin: 0 0 35px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.9;
+            line-height: 1.6;
+        }
+
+        .hero-features {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .hero-feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            padding: 15px 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            min-width: 100px;
+            max-width: 120px;
+        }
+
+        .hero-feature:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .feature-icon {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .hero-feature span {
+            font-weight: 500;
+            font-size: 0.85rem;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0 30px 0;
+            }
+            
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-content p {
+                font-size: 1.1rem;
+                margin-bottom: 25px;
+            }
+            
+            .hero-features {
+                gap: 15px;
+            }
+            
+            .hero-feature {
+                min-width: 80px;
+                max-width: 100px;
+                padding: 12px 10px;
+            }
+            
+            .feature-icon {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+            
+            .hero-feature span {
+                font-size: 0.8rem;
+            }
+        }
+
+        .filters {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            margin-bottom: 50px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .filters-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .filters-header h3 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 15px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .filters-header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+        }
+
+        /* Search Styles */
+        .search-container {
+            margin: 30px 0 20px 0;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 18px 50px 18px 55px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            pointer-events: none;
+        }
+
+        .clear-search-btn {
+            position: absolute;
+            right: 15px;
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .clear-search-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--text-primary);
+        }
+
+        /* Advanced Filters Styles */
+        .advanced-filters-toggle {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .advanced-filter-btn {
+            background: var(--surface-dark);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        .advanced-filter-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .advanced-filter-btn.active .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .advanced-filters-modal {
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .advanced-filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .advanced-filters-grid .filter-group label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .advanced-filters-grid select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .advanced-filters-grid select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .advanced-filters-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Custom Select Styles */
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select select {
+            width: 100%;
+            padding: 16px 20px;
+            padding-right: 50px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface-dark);
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            color: var(--text-primary);
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .custom-select::after {
+            content: '\f0d7';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .custom-select select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .custom-select select:focus + .custom-select::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+
+        .custom-select:hover select {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+
+
+        .custom-dropdown {
+            position: relative;
+            width: 100%;
+        }
+
+        .dropdown-selected {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #b8b8b8;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .dropdown-selected:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .dropdown-selected.active {
+            border-color: rgba(37, 99, 235, 0.8);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .dropdown-selected i {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+
+        .dropdown-selected.active i {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(40, 44, 52, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            margin-top: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .dropdown-options.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-option {
+            padding: 12px 16px;
+            color: #b8b8b8;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dropdown-option:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-option:hover {
+            background: rgba(37, 99, 235, 0.2);
+        }
+
+        .dropdown-option.selected {
+            background: rgba(37, 99, 235, 0.3);
+            color: #2563eb;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .apply-filter-btn {
+            background: linear-gradient(45deg, #2563eb, #1d4ed8);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .apply-filter-btn:hover {
+            background: linear-gradient(45deg, #1d4ed8, #1e40af);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .reset-filter-btn {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: white;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .reset-filter-btn:hover {
+            background: linear-gradient(45deg, #c0392b, #a93226);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }
+
+        .objects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .object-card {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            animation: fadeInUp 1s ease-out;
+            position: relative;
+            height: auto;
+        }
+
+        .object-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .object-info {
+            padding: 20px;
+        }
+
+        .object-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0 0 0;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px 0;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: right;
+            flex: 0 0 auto;
+            max-width: 50%;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .detail-item i {
+            color: #60a5fa;
+            font-size: 0.9rem;
+            width: 14px;
+            text-align: center;
+        }
+
+        .object-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .favorite-btn i {
+            font-size: 18px;
+            transition: all 0.3s ease;
+            color: rgba(0, 0, 0, 0.3);
+        }
+
+        .favorite-btn.active i {
+            color: #ef4444;
+            transform: scale(1.2);
+        }
+
+        .favorite-btn.active {
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .object-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+            transition: all 0.4s ease, opacity 0.3s ease;
+            position: relative;
+        }
+
+        .object-card:hover .object-image {
+            transform: scale(1.05);
+        }
+
+        .object-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: flex-end;
+            padding: 25px;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .image-nav-buttons {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 15px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .image-nav-buttons .nav-btn {
+            pointer-events: all;
+        }
+
+        .object-card:hover .image-nav-buttons {
+            opacity: 1;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            font-size: 16px;
+            z-index: 10;
+            position: relative;
+        }
+
+        .nav-btn:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: white;
+            transform: scale(1.2);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+
+        .nav-btn:active {
+            transform: scale(1.1);
+        }
+
+        .image-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .indicator.active {
+            background: white;
+        }
+
+        .overlay-title {
+            color: white;
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            animation: slideInUp 0.5s ease-out;
+        }
+
+        .object-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .object-location {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .object-price {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: var(--shadow-hover);
+            border: 1px solid var(--border);
+            animation: fadeInUp 0.3s ease;
+        }
+
+        .modal h2 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            background: var(--surface-dark);
+            font-size: 16px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--border);
+            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid var(--border);
+            background: transparent;
+            color: var(--text-primary);
+            border-radius: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--surface-dark);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
+        }
+
+        /* Login type selector styles */
+        .login-type-selector {
+            display: flex;
+            background: var(--surface-dark);
+            border-radius: 12px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .login-type-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .login-type-btn:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .login-type-btn.active {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .login-type-btn i {
+            font-size: 0.9rem;
+        }
+
+        /* Footer Styles */
+        .site-footer {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            margin-top: 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .site-footer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="none"><path d="M0,20 Q250,80 500,20 T1000,20 V100 H0 Z" fill="rgba(255,255,255,0.05)"/></svg>') no-repeat;
+            background-size: cover;
+        }
+
+        .footer-content {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 60px 20px 40px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+        }
+
+        .footer-section h3,
+        .footer-section h4 {
+            font-family: 'Manrope', sans-serif;
+            margin-bottom: 20px;
+            color: white;
+        }
+
+        .footer-logo h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            background: linear-gradient(45deg, #fff, #f0f9ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .footer-logo p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 25px;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            width: 45px;
+            height: 45px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .social-link:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            transform: translateX(5px);
+        }
+
+        .footer-contact {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .contact-item i {
+            color: #60a5fa;
+            width: 16px;
+            margin-top: 2px;
+        }
+
+        .contact-item a {
+            color: inherit;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-item a:hover {
+            color: white;
+        }
+
+        .footer-bottom {
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .footer-bottom-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 25px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .footer-copyright p {
+            margin: 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .footer-legal {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .footer-legal a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-legal a:hover {
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .login-type-btn {
+                padding: 10px 12px;
+                font-size: 0.9rem;
+            }
+            
+            .login-type-btn i {
+                font-size: 0.8rem;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                padding: 40px 20px 30px;
+            }
+
+            .footer-bottom-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+
+            .footer-legal {
+                justify-content: center;
+            }
+            
+            .nav-actions {
+                gap: 10px;
+            }
+            
+            .auth-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .objects-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .filters-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Auth Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            z-index: 10000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 24px;
+            width: 400px;
+            max-width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        .close:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            font-size: 1rem;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-primary, .btn-secondary {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        /* Login type selector */
+        .login-type-selector {
+            display: flex;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--surface-dark);
+        }
+
+        .login-type-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .login-type-btn:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .login-type-btn.active {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        /* Auth form switching styles */
+        .auth-form {
+            width: 100%;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .auth-switch p {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .auth-switch a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .auth-switch a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+
+        .login-type-btn.active:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        /* Advanced Filters Dropdown */
+        .advanced-filters-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            padding: 20px;
+            margin-top: 10px;
+            width: 300px;
+            z-index: 1001;
+        }
+
+        .advanced-filters-content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .advanced-filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-dark);
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-group select:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .select-arrow {
+            position: absolute;
+            top: 50%;
+            right: 10px;
+            transform: translateY(-50%);
+            pointer-events: none;
+        }
+
+        .advanced-filters-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: transparent;
+            color: var(--text-primary);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .btn-primary {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary-gradient);
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .objects-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .filters {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .filter-group {
+                min-width: unset;
+            }
+        }
+
+        /* Update notification styles */
+        .update-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 10000;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(20px);
+            animation: slideInRight 0.3s ease-out, slideOutRight 0.3s ease-in 2.7s forwards;
+        }
+
+        .update-notification-content {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .update-notification-content i {
+            color: #10b981;
+            font-size: 1.1rem;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOutRight {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <a href="/" class="logo">
+            <svg class="logo-icon" viewBox="0 0 32 32" width="32" height="32">
+                <defs>
+                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#2563eb"/>
+                        <stop offset="100%" style="stop-color:#1d4ed8"/>
+                    </linearGradient>
+                </defs>
+                <path fill="url(#logoGradient)" d="M16 2L4 12v16a2 2 0 0 0 2 2h6V20h8v10h6a2 2 0 0 0 2-2V12L16 2z"/>
+                <circle fill="#60a5fa" cx="16" cy="14" r="3"/>
+            </svg>
+            CityAR
+        </a>
+            <div class="nav-actions">
+                <div class="user-menu">
+                    <div class="user-info" onclick="toggleDropdown()" id="userInfo">
+                        <div class="user-avatar" id="userAvatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="user-name-display" id="userNameDisplay" style="display: none;">
+                            <span id="userNameText">Пользователь</span>
+                        </div>
+                    </div>
+                    <div class="dropdown" id="userDropdown">
+                        <!-- Menu items for non-authenticated users -->
+                        <div class="auth-menu" id="authMenu">
+                            <a href="#" class="dropdown-item" onclick="showAuthModal('login')">
+                                <i class="fas fa-sign-in-alt"></i>
+                                <span>Войти</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="showAuthModal('register')">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Регистрация</span>
+                            </a>
+                        </div>
+                        
+                        <!-- Menu items for authenticated users -->
+                        <div class="user-authenticated-menu" id="userAuthenticatedMenu" style="display: none;">
+                            <div class="dropdown-header">
+                                <span class="user-name" id="userName">Пользователь</span>
+                            </div>
+                            <a href="cabinet.html" class="dropdown-item">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Личный кабинет</span>
+                            </a>
+                            <a href="requests.html" class="dropdown-item">
+                                <i class="fas fa-clipboard-list"></i>
+                                <span>Мои заявки</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="showFavorites(); return false;">
+                                <i class="fas fa-heart"></i>
+                                <span>Избранное</span>
+                            </a>
+                            <a href="admin.html" class="dropdown-item admin-only" style="display: none;">
+                                <i class="fas fa-cog"></i>
+                                <span>Панель админа</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="deleteAccount(); return false;" style="color: #dc2626;">
+                                <i class="fas fa-trash"></i>
+                                <span>Удалить аккаунт</span>
+                            </a>
+                            <a href="#" class="dropdown-item" onclick="logout(); return false;">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Выйти</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Недвижимость мечты</h1>
+                    <p>Найдите идеальную квартиру, дом или коммерческую недвижимость в лучших районах города</p>
+                    
+                    <div class="hero-features">
+                        <div class="hero-feature">
+                            <div class="feature-icon">
+                                <i class="fas fa-search"></i>
+                            </div>
+                            <span>Умный поиск</span>
+                        </div>
+                        <div class="hero-feature">
+                            <div class="feature-icon">
+                                <i class="fas fa-shield-alt"></i>
+                            </div>
+                            <span>Проверенные объекты</span>
+                        </div>
+                        <div class="hero-feature">
+                            <div class="feature-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <span>Поддержка 24/7</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="filters">
+            <div class="filters-header">
+                <h3>Найти недвижимость мечты</h3>
+                <p>Используйте умные фильтры для поиска идеального объекта</p>
+            </div>
+            
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label for="typeFilter">Тип недвижимости</label>
+                    <div class="custom-dropdown" data-target="typeFilter">
+                        <div class="dropdown-selected">
+                            <span>Все типы объектов</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="">Все типы объектов</div>
+                            <div class="dropdown-option" data-value="apartment">Квартира</div>
+                            <div class="dropdown-option" data-value="house">Дом</div>
+                            <div class="dropdown-option" data-value="commercial">Коммерческая</div>
+                            <div class="dropdown-option" data-value="land">Земельный участок</div>
+                        </div>
+                        <select id="typeFilter" style="display: none;">
+                            <option value="">Все типы объектов</option>
+                            <option value="apartment">Квартира</option>
+                            <option value="house">Дом</option>
+                            <option value="commercial">Коммерческая</option>
+                            <option value="land">Земельный участок</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="locationFilter">Район города</label>
+                    <div class="custom-dropdown" data-target="locationFilter">
+                        <div class="dropdown-selected">
+                            <span>Все районы</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="">Все районы</div>
+                            <div class="dropdown-option" data-value="center">Центральный</div>
+                            <div class="dropdown-option" data-value="north">Северный</div>
+                            <div class="dropdown-option" data-value="south">Южный</div>
+                            <div class="dropdown-option" data-value="east">Восточный</div>
+                            <div class="dropdown-option" data-value="west">Западный</div>
+                        </div>
+                        <select id="locationFilter" style="display: none;">
+                            <option value="">Все районы</option>
+                            <option value="center">Центральный</option>
+                            <option value="north">Северный</option>
+                            <option value="south">Южный</option>
+                            <option value="east">Восточный</option>
+                            <option value="west">Западный</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>От (₽)</label>
+                    <div class="custom-dropdown" data-target="minPriceFilter">
+                        <div class="dropdown-selected">
+                            <span>Мин. цена</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="">Мин. цена</div>
+                            <div class="dropdown-option" data-value="1000000">1 млн</div>
+                            <div class="dropdown-option" data-value="2000000">2 млн</div>
+                            <div class="dropdown-option" data-value="3000000">3 млн</div>
+                            <div class="dropdown-option" data-value="5000000">5 млн</div>
+                            <div class="dropdown-option" data-value="7000000">7 млн</div>
+                            <div class="dropdown-option" data-value="10000000">10 млн</div>
+                            <div class="dropdown-option" data-value="15000000">15 млн</div>
+                            <div class="dropdown-option" data-value="20000000">20 млн</div>
+                            <div class="dropdown-option" data-value="30000000">30 млн</div>
+                            <div class="dropdown-option" data-value="50000000">50 млн</div>
+                        </div>
+                        <select id="minPriceFilter" style="display: none;">
+                            <option value="">Мин. цена</option>
+                            <option value="1000000">1 млн</option>
+                            <option value="2000000">2 млн</option>
+                            <option value="3000000">3 млн</option>
+                            <option value="5000000">5 млн</option>
+                            <option value="7000000">7 млн</option>
+                            <option value="10000000">10 млн</option>
+                            <option value="15000000">15 млн</option>
+                            <option value="20000000">20 млн</option>
+                            <option value="30000000">30 млн</option>
+                            <option value="50000000">50 млн</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label>До (₽)</label>
+                    <div class="custom-dropdown" data-target="maxPriceFilter">
+                        <div class="dropdown-selected">
+                            <span>Макс. цена</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="">Макс. цена</div>
+                            <div class="dropdown-option" data-value="3000000">3 млн</div>
+                            <div class="dropdown-option" data-value="5000000">5 млн</div>
+                            <div class="dropdown-option" data-value="7000000">7 млн</div>
+                            <div class="dropdown-option" data-value="10000000">10 млн</div>
+                            <div class="dropdown-option" data-value="15000000">15 млн</div>
+                            <div class="dropdown-option" data-value="20000000">20 млн</div>
+                            <div class="dropdown-option" data-value="30000000">30 млн</div>
+                            <div class="dropdown-option" data-value="50000000">50 млн</div>
+                            <div class="dropdown-option" data-value="100000000">100+ млн</div>
+                        </div>
+                        <select id="maxPriceFilter" style="display: none;">
+                            <option value="">Макс. цена</option>
+                            <option value="3000000">3 млн</option>
+                            <option value="5000000">5 млн</option>
+                            <option value="7000000">7 млн</option>
+                            <option value="10000000">10 млн</option>
+                            <option value="15000000">15 млн</option>
+                            <option value="20000000">20 млн</option>
+                            <option value="30000000">30 млн</option>
+                            <option value="50000000">50 млн</option>
+                            <option value="100000000">100+ млн</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="sortBy">Сортировка</label>
+                    <div class="custom-dropdown" data-target="sortBy">
+                        <div class="dropdown-selected">
+                            <span>По цене (возрастание)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div class="dropdown-options">
+                            <div class="dropdown-option" data-value="price_asc">По цене (возрастание)</div>
+                            <div class="dropdown-option" data-value="price_desc">По цене (убывание)</div>
+                            <div class="dropdown-option" data-value="date_desc">Сначала новые</div>
+                            <div class="dropdown-option" data-value="date_asc">Сначала старые</div>
+                        </div>
+                        <select id="sortBy" style="display: none;">
+                            <option value="price_asc">По цене (возрастание)</option>
+                            <option value="price_desc">По цене (убывание)</option>
+                            <option value="date_desc">Сначала новые</option>
+                            <option value="date_asc">Сначала старые</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="filter-group filter-buttons">
+                    <button class="apply-filter-btn" onclick="filterObjects()">
+                        <i class="fas fa-search"></i>
+                        Применить фильтры
+                    </button>
+                    <button class="reset-filter-btn" onclick="resetFilters()" style="display: none;">
+                        <i class="fas fa-undo"></i>
+                        Сбросить фильтры
+                    </button>
+                </div>
+                
+                <div class="filter-group advanced-filters-toggle">
+                    <button class="advanced-filter-btn" onclick="toggleAdvancedFilters()">
+                        <i class="fas fa-sliders-h"></i>
+                        Дополнительные фильтры
+                        <i class="fas fa-chevron-down toggle-icon"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="objects-grid" id="objectsContainer">
+            <!-- Objects will be loaded here -->
+        </section>
+    </main>
+
+    <!-- Auth Modal -->
+    <div id="authModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeAuthModal()">&times;</span>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form">
+                <h2>Вход в систему</h2>
+                
+                <!-- Login Type Selector -->
+                <div class="form-group">
+                    <label>Способ входа</label>
+                    <div class="login-type-selector">
+                        <button type="button" class="login-type-btn active" data-type="email" onclick="setLoginType('email')">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </button>
+                        <button type="button" class="login-type-btn" data-type="phone" onclick="setLoginType('phone')">
+                            <i class="fas fa-phone"></i>
+                            Телефон
+                        </button>
+                    </div>
+                </div>
+                
+                <form id="authLoginForm" autocomplete="off" data-lpignore="true">
+                    <div class="form-group" id="loginEmailGroup">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" name="email" placeholder="Введите email" required autocomplete="off" data-lpignore="true">
+                    </div>
+                    
+                    <div class="form-group" id="loginPhoneGroup" style="display: none;">
+                        <label for="loginPhone">Телефон</label>
+                        <input type="tel" id="loginPhone" name="phone" placeholder="+7 (___) ___-__-__" autocomplete="off" data-lpignore="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">Пароль</label>
+                        <input type="password" id="loginPassword" name="password" placeholder="Введите пароль" required autocomplete="new-password" data-lpignore="true" readonly onfocus="this.removeAttribute('readonly');">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeAuthModal()">Отмена</button>
+                        <button type="submit" class="btn-primary">Войти</button>
+                    </div>
+                </form>
+                
+                <div class="auth-switch">
+                    <p>Нет аккаунта? <a href="#" onclick="showRegisterForm()">Зарегистрироваться</a></p>
+                </div>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form" style="display: none;">
+                <h2>Регистрация</h2>
+                
+                <form id="authRegisterForm" autocomplete="off" data-lpignore="true">
+                    <div class="form-group">
+                        <label for="registerName">Имя</label>
+                        <input type="text" id="registerName" name="name" placeholder="Введите ваше имя" required autocomplete="off" data-lpignore="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPhone">Телефон</label>
+                        <input type="tel" id="registerPhone" name="phone" placeholder="+7 (___) ___-__-__" required autocomplete="off" data-lpignore="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerEmail">Email</label>
+                        <input type="email" id="registerEmail" name="email" placeholder="Введите email" required autocomplete="off" data-lpignore="true">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPassword">Пароль</label>
+                        <input type="password" id="registerPassword" name="password" placeholder="Введите пароль" required autocomplete="new-password" data-lpignore="true" minlength="6" readonly onfocus="this.removeAttribute('readonly');">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="registerPasswordConfirm">Повторите пароль</label>
+                        <input type="password" id="registerPasswordConfirm" name="passwordConfirm" placeholder="Повторите пароль" required autocomplete="new-password" data-lpignore="true" minlength="6" readonly onfocus="this.removeAttribute('readonly');">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeAuthModal()">Отмена</button>
+                        <button type="submit" class="btn-primary">Зарегистрироваться</button>
+                    </div>
+                </form>
+                
+                <div class="auth-switch">
+                    <p>Есть аккаунт? <a href="#" onclick="showLoginForm()">Войти</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Request Modal -->
+    <div id="requestModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeRequestModal()">&times;</span>
+            <h2>Подать заявку</h2>
+            <form id="requestForm">
+                <div class="form-group">
+                    <label for="requestMessage">Сообщение</label>
+                    <textarea id="requestMessage" placeholder="Опишите ваши пожелания..." style="width: 100%; min-height: 100px; padding: 15px; border: 2px solid transparent; border-radius: 12px; background: var(--surface-dark); resize: vertical; font-family: inherit;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="requestPhone">Телефон</label>
+                    <input type="tel" id="requestPhone" placeholder="+7 (___) ___-__-__">
+                </div>
+                <div class="form-group">
+                    <label for="requestEmail">Email</label>
+                    <input type="email" id="requestEmail" placeholder="Введите email">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="closeRequestModal()">Отмена</button>
+                    <button type="submit" class="btn-primary">Отправить заявку</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Additional UI functionality
+        function toggleDropdown() {
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.toggle('show');
+        }
+
+        // Auth modal functions
+        function showAuthModal(mode = 'login') {
+            const modal = document.getElementById('authModal');
+            
+            if (mode === 'login') {
+                showLoginForm();
+            } else {
+                showRegisterForm();
+            }
+            
+            modal.style.display = 'block';
+            
+            // Close dropdown after opening modal
+            const dropdown = document.getElementById('userDropdown');
+            dropdown.classList.remove('show');
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('registerForm').style.display = 'none';
+            setLoginType('email');
+        }
+
+        function showRegisterForm() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('registerForm').style.display = 'block';
+        }
+
+        function closeAuthModal() {
+            const modal = document.getElementById('authModal');
+            modal.style.display = 'none';
+            
+            // Clear all form fields to prevent browser password saving
+            clearAuthForms();
+            
+            // Reset to login form and email tab
+            showLoginForm();
+        }
+
+        function clearAuthForms() {
+            // Clear login form
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPhone').value = '';
+            document.getElementById('loginPassword').value = '';
+            
+            // Clear register form
+            document.getElementById('registerName').value = '';
+            document.getElementById('registerPhone').value = '';
+            document.getElementById('registerEmail').value = '';
+            document.getElementById('registerPassword').value = '';
+            document.getElementById('registerPasswordConfirm').value = '';
+        }
+
+        // Password confirmation validation
+        function checkPasswordMatch() {
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerPasswordConfirm').value;
+            const confirmField = document.getElementById('registerPasswordConfirm');
+            
+            if (confirmPassword && password !== confirmPassword) {
+                confirmField.style.borderColor = '#e74c3c';
+                confirmField.style.boxShadow = '0 0 0 3px rgba(231, 76, 60, 0.1)';
+            } else {
+                confirmField.style.borderColor = '';
+                confirmField.style.boxShadow = '';
+            }
+        }
+
+        function logout() {
+            console.log('Logout function called');
+            
+            // Prevent any other modal popups
+            event.preventDefault && event.preventDefault();
+            event.stopPropagation && event.stopPropagation();
+            
+            // Clear user data
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            
+            // Update interface
+            checkAuth();
+            
+            // Hide any existing modals
+            const existingModals = document.querySelectorAll('.modal, [id*="modal"], [id*="Modal"]');
+            existingModals.forEach(modal => {
+                if (modal.style) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Show animated notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                color: white;
+                padding: 15px 25px;
+                border-radius: 12px;
+                box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+                z-index: 10001;
+                font-family: 'Manrope', sans-serif;
+                font-weight: 500;
+                transform: translateX(100%);
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                opacity: 0;
+            `;
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Вы успешно вышли из аккаунта</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 10);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        function setLoginType(type) {
+            // Update active button
+            document.querySelectorAll('.login-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-type="${type}"]`).classList.add('active');
+            
+            // Show/hide appropriate input fields for login form
+            const emailGroup = document.getElementById('loginEmailGroup');
+            const phoneGroup = document.getElementById('loginPhoneGroup');
+            
+            if (type === 'email') {
+                emailGroup.style.display = 'block';
+                phoneGroup.style.display = 'none';
+                document.getElementById('loginEmail').required = true;
+                document.getElementById('loginPhone').required = false;
+            } else {
+                emailGroup.style.display = 'none';
+                phoneGroup.style.display = 'block';
+                document.getElementById('loginEmail').required = false;
+                document.getElementById('loginPhone').required = true;
+            }
+        }
+
+        // Close dropdown when clicking anywhere except the user menu
+        document.addEventListener('click', function(event) {
+            const userMenu = document.getElementById('userMenu');
+            const dropdown = document.getElementById('userDropdown');
+            
+            // Always close dropdown if clicked outside user menu
+            if (userMenu && !userMenu.contains(event.target)) {
+                dropdown.classList.remove('show');
+            }
+        });
+
+        // Also close dropdown on escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const dropdown = document.getElementById('userDropdown');
+                dropdown.classList.remove('show');
+            }
+        });
+
+                // Custom dropdown functionality
+        function initializeDropdowns() {
+            document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+                const selected = dropdown.querySelector('.dropdown-selected');
+                const options = dropdown.querySelector('.dropdown-options');
+                const hiddenSelect = dropdown.querySelector('select');
+                
+                // Toggle dropdown
+                selected.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Close other dropdowns
+                    document.querySelectorAll('.custom-dropdown').forEach(otherDropdown => {
+                        if (otherDropdown !== dropdown) {
+                            otherDropdown.querySelector('.dropdown-selected').classList.remove('active');
+                            otherDropdown.querySelector('.dropdown-options').classList.remove('show');
+                        }
+                    });
+                    
+                    // Toggle current dropdown
+                    selected.classList.toggle('active');
+                    options.classList.toggle('show');
+                });
+                
+                // Handle option selection
+                options.addEventListener('click', function(e) {
+                    if (e.target.classList.contains('dropdown-option')) {
+                        const value = e.target.dataset.value;
+                        const text = e.target.textContent;
+                        
+                        // Update display
+                        selected.querySelector('span').textContent = text;
+                        
+                        // Update hidden select
+                        hiddenSelect.value = value;
+                        
+                        // Update option states
+                        options.querySelectorAll('.dropdown-option').forEach(opt => {
+                            opt.classList.remove('selected');
+                        });
+                        e.target.classList.add('selected');
+                        
+                        // Close dropdown
+                        selected.classList.remove('active');
+                        options.classList.remove('show');
+                        
+                        // Just close dropdown, don't check filters yet
+                    }
+                });
+            });
+            
+            // Close dropdowns when clicking outside
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+                    dropdown.querySelector('.dropdown-selected').classList.remove('active');
+                    dropdown.querySelector('.dropdown-options').classList.remove('show');
+                });
+            });
+        }
+
+        function checkFiltersAndToggleResetButton() {
+            const typeFilter = document.getElementById('typeFilter').value;
+            const minPriceFilter = document.getElementById('minPriceFilter').value;
+            const maxPriceFilter = document.getElementById('maxPriceFilter').value;
+            const locationFilter = document.getElementById('locationFilter').value;
+            const sortBy = document.getElementById('sortBy').value;
+            
+            // Check if any filter is applied (not default)
+            const hasFilters = typeFilter || minPriceFilter || maxPriceFilter || locationFilter || (sortBy !== 'price_asc');
+            
+            const resetBtn = document.querySelector('.reset-filter-btn');
+            if (hasFilters) {
+                resetBtn.style.display = 'flex';
+            } else {
+                resetBtn.style.display = 'none';
+            }
+        }
+
+        function resetFilters() {
+            // Reset all dropdowns to first option
+            document.querySelectorAll('.custom-dropdown').forEach(dropdown => {
+                const selected = dropdown.querySelector('.dropdown-selected span');
+                const options = dropdown.querySelector('.dropdown-options');
+                const hiddenSelect = dropdown.querySelector('select');
+                const firstOption = options.querySelector('.dropdown-option');
+                
+                if (firstOption) {
+                    selected.textContent = firstOption.textContent;
+                    hiddenSelect.value = firstOption.dataset.value;
+                    
+                    options.querySelectorAll('.dropdown-option').forEach(opt => {
+                        opt.classList.remove('selected');
+                    });
+                    firstOption.classList.add('selected');
+                }
+            });
+
+            // Hide reset button and apply filters
+            document.querySelector('.reset-filter-btn').style.display = 'none';
+            filterObjects();
+        }
+
+        // Update filter function to work with new price selects
+        window.filterObjects = function() {
+            const typeFilter = document.getElementById('typeFilter')?.value || '';
+            const minPrice = parseFloat(document.getElementById('minPriceFilter')?.value) || 0;
+            const maxPriceValue = document.getElementById('maxPriceFilter')?.value;
+            const maxPrice = maxPriceValue ? parseFloat(maxPriceValue) : Infinity;
+            const locationFilter = document.getElementById('locationFilter')?.value || '';
+            const sortBy = document.getElementById('sortBy')?.value || 'price_asc';
+            
+            // Debug info
+            console.log('Applying filters:', {
+                typeFilter, minPrice, maxPrice, locationFilter, sortBy
+            });
+            console.log('Available objects:', objects.length);
+            
+            filteredObjects = objects.filter(object => {
+                const typeMatch = !typeFilter || object.type === typeFilter;
+                const priceMatch = object.price >= minPrice && (maxPrice === Infinity || object.price <= maxPrice);
+                const locationMatch = !locationFilter || object.location.toLowerCase().includes(locationFilter.toLowerCase());
+                
+                // Debug individual object filtering
+                if (typeFilter) {
+                    console.log(`Object ${object.id}: type="${object.type}", typeFilter="${typeFilter}", match=${typeMatch}`);
+                }
+                
+                return typeMatch && priceMatch && locationMatch;
+            });
+            
+            console.log('Filtered objects:', filteredObjects.length);
+            
+            // Sort objects
+            switch (sortBy) {
+                case 'price_asc':
+                    filteredObjects.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price_desc':
+                    filteredObjects.sort((a, b) => b.price - a.price);
+                    break;
+                case 'date_desc':
+                    filteredObjects.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+                    break;
+            }
+            
+            // Show reset button after applying filters (if any filters are active)
+            checkFiltersAndToggleResetButton();
+            
+            renderObjects();
+        }
+        
+        // Debug function to test filtering in console
+        window.testFilter = function(type) {
+            console.log(`Testing filter for type: "${type}"`);
+            const matches = objects.filter(obj => obj.type === type);
+            console.log(`Found ${matches.length} matches:`);
+            matches.forEach(obj => {
+                console.log(`- ID: ${obj.id}, Title: "${obj.title}", Type: "${obj.type}"`);
+            });
+            return matches;
+        }
+
+        // Auth form handler
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login form handler
+            const loginForm = document.getElementById('authLoginForm');
+            if (loginForm) {
+                loginForm.setAttribute('autocomplete', 'off');
+                
+                loginForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const loginType = document.querySelector('.login-type-btn.active').dataset.type;
+                    const password = document.getElementById('loginPassword').value;
+                    let loginValue;
+                    
+                    if (loginType === 'email') {
+                        loginValue = document.getElementById('loginEmail').value;
+                    } else {
+                        loginValue = document.getElementById('loginPhone').value.trim();
+                        
+                        // Нормализуем номер телефона для поиска в базе
+                        let normalizedPhone = loginValue.replace(/\D/g, ''); // убираем все не-цифры
+                        
+                        // Обрабатываем разные форматы
+                        if (normalizedPhone.startsWith('8') && normalizedPhone.length === 11) {
+                            normalizedPhone = '7' + normalizedPhone.substring(1); // 8XXXXXXXXXX -> 7XXXXXXXXXX
+                        } else if (normalizedPhone.startsWith('9') && normalizedPhone.length === 10) {
+                            normalizedPhone = '7' + normalizedPhone; // 9XXXXXXXXX -> 79XXXXXXXXX
+                        } else if (normalizedPhone.startsWith('7') && normalizedPhone.length === 11) {
+                            // уже правильный формат 7XXXXXXXXXX
+                        } else if (normalizedPhone.length === 10 && !normalizedPhone.startsWith('7')) {
+                            normalizedPhone = '7' + normalizedPhone; // добавляем 7 к 10-значному номеру
+                        }
+                        
+                        loginValue = '+' + normalizedPhone; // итоговый формат +7XXXXXXXXXX
+                        console.log('Normalized phone:', loginValue);
+                    }
+                    
+                    if (!loginValue || !password) {
+                        alert('Заполните все поля');
+                        return;
+                    }
+                    
+                    console.log('Попытка входа:', { loginType, loginValue, hasPassword: !!password });
+                    
+                    try {
+                        const response = await fetch('/api/auth/login', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                email: loginValue, // API автоматически определит email или телефон
+                                password: password
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            // Сохраняем токен и данные пользователя
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            
+                            // Очищаем формы после успешного входа
+                            clearAuthForms();
+                            
+                            // Закрываем модальное окно
+                            closeAuthModal();
+                            
+                            // Обновляем интерфейс
+                            checkAuth();
+                            
+                            alert('Успешный вход!');
+                        } else {
+                            alert('Ошибка: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Ошибка авторизации:', error);
+                        alert('Произошла ошибка при входе');
+                    }
+                });
+            }
+
+            // Register form handler
+            const registerForm = document.getElementById('authRegisterForm');
+            if (registerForm) {
+                registerForm.setAttribute('autocomplete', 'off');
+                
+                registerForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const name = document.getElementById('registerName').value.trim();
+                    const phone = document.getElementById('registerPhone').value.trim();
+                    const email = document.getElementById('registerEmail').value.trim();
+                    const password = document.getElementById('registerPassword').value;
+                    const passwordConfirm = document.getElementById('registerPasswordConfirm').value;
+                    
+                    // Validation
+                    if (!name || !phone || !email || !password || !passwordConfirm) {
+                        alert('Заполните все поля');
+                        return;
+                    }
+                    
+                    if (password !== passwordConfirm) {
+                        alert('Пароли не совпадают');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        alert('Пароль должен содержать минимум 6 символов');
+                        return;
+                    }
+                    
+                    // Normalize phone
+                    let normalizedPhone = phone.replace(/\D/g, '');
+                    if (normalizedPhone.startsWith('8') && normalizedPhone.length === 11) {
+                        normalizedPhone = '7' + normalizedPhone.substring(1);
+                    } else if (normalizedPhone.startsWith('9') && normalizedPhone.length === 10) {
+                        normalizedPhone = '7' + normalizedPhone;
+                    } else if (normalizedPhone.length === 10 && !normalizedPhone.startsWith('7')) {
+                        normalizedPhone = '7' + normalizedPhone;
+                    }
+                    normalizedPhone = '+' + normalizedPhone;
+                    
+                    try {
+                        const response = await fetch('/api/auth/register', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                name: name,
+                                email: email,
+                                phone: normalizedPhone,
+                                password: password
+                            })
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (response.ok) {
+                            // Сохраняем токен и данные пользователя
+                            localStorage.setItem('token', data.token);
+                            localStorage.setItem('user', JSON.stringify(data.user));
+                            
+                            // Очищаем формы после успешной регистрации
+                            clearAuthForms();
+                            
+                            // Закрываем модальное окно
+                            closeAuthModal();
+                            
+                            // Обновляем интерфейс
+                            checkAuth();
+                            
+                            alert('Регистрация прошла успешно!');
+                        } else {
+                            alert('Ошибка: ' + data.error);
+                        }
+                    } catch (error) {
+                        console.error('Ошибка регистрации:', error);
+                        alert('Произошла ошибка при регистрации');
+                    }
+                });
+            }
+
+            // Add password confirmation validation
+            const registerPassword = document.getElementById('registerPassword');
+            const registerPasswordConfirm = document.getElementById('registerPasswordConfirm');
+            
+            if (registerPassword && registerPasswordConfirm) {
+                registerPassword.addEventListener('input', checkPasswordMatch);
+                registerPasswordConfirm.addEventListener('input', checkPasswordMatch);
+            }
+        });
+
+        // Smooth scroll and animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize custom dropdowns
+            initializeDropdowns();
+            
+            // Add stagger animation to cards
+            const cards = document.querySelectorAll('.object-card');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Header scroll effect
+            window.addEventListener('scroll', function() {
+                const header = document.querySelector('header');
+                if (window.scrollY > 100) {
+                    header.style.background = 'rgba(255, 255, 255, 0.98)';
+                    header.style.boxShadow = 'var(--shadow)';
+                } else {
+                    header.style.background = 'var(--surface)';
+                    header.style.boxShadow = 'none';
+                }
+            });
+        });
+    </script>
+
+    <!-- Advanced Filters Modal -->
+    <div id="advancedFiltersModal" class="modal">
+        <div class="modal-content advanced-filters-modal">
+            <span class="close" onclick="closeAdvancedFilters()">&times;</span>
+            <h2>Дополнительные фильтры</h2>
+            
+            <div class="advanced-filters-grid">
+                <div class="filter-group">
+                    <label for="buildingTypeFilter">Тип дома</label>
+                    <select id="buildingTypeFilter">
+                        <option value="">Любой тип</option>
+                        <option value="Кирпичный">Кирпичный</option>
+                        <option value="Панельный">Панельный</option>
+                        <option value="Монолитный">Монолитный</option>
+                        <option value="Блочный">Блочный</option>
+                        <option value="Деревянный">Деревянный</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="bathroomTypeFilter">Тип санузла</label>
+                    <select id="bathroomTypeFilter">
+                        <option value="">Любой</option>
+                        <option value="Раздельный">Раздельный</option>
+                        <option value="Совмещенный">Совмещенный</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="balconyTypeFilter">Балкон/Лоджия</label>
+                    <select id="balconyTypeFilter">
+                        <option value="">Не важно</option>
+                        <option value="Балкон">Балкон</option>
+                        <option value="Лоджия">Лоджия</option>
+                        <option value="Терраса">Терраса</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="repairTypeFilter">Ремонт</label>
+                    <select id="repairTypeFilter">
+                        <option value="">Любой</option>
+                        <option value="Без ремонта">Без ремонта</option>
+                        <option value="Косметический">Косметический</option>
+                        <option value="Евроремонт">Евроремонт</option>
+                        <option value="Дизайнерский">Дизайнерский</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="windowViewFilter">Вид из окон</label>
+                    <select id="windowViewFilter">
+                        <option value="">Не важно</option>
+                        <option value="На двор">На двор</option>
+                        <option value="На улицу">На улицу</option>
+                        <option value="На парк">На парк</option>
+                        <option value="На водоем">На водоем</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="parkingTypeFilter">Парковка</label>
+                    <select id="parkingTypeFilter">
+                        <option value="">Не важно</option>
+                        <option value="Подземная">Подземная</option>
+                        <option value="Наземная">Наземная</option>
+                        <option value="Во дворе">Во дворе</option>
+                        <option value="Нет">Нет</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="heatingTypeFilter">Отопление</label>
+                    <select id="heatingTypeFilter">
+                        <option value="">Любое</option>
+                        <option value="Центральное">Центральное</option>
+                        <option value="Автономное">Автономное</option>
+                        <option value="Электрическое">Электрическое</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="gasSupplyFilter">Газоснабжение</label>
+                    <select id="gasSupplyFilter">
+                        <option value="">Не важно</option>
+                        <option value="Центральное">Центральное</option>
+                        <option value="Баллонное">Баллонное</option>
+                        <option value="Нет">Нет</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="advanced-filters-actions">
+                <button type="button" class="btn-secondary" onclick="closeAdvancedFilters()">Отмена</button>
+                <button type="button" class="btn-primary" onclick="applyAdvancedFilters()">Применить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advanced Filters Dropdown -->
+    <div id="advancedFiltersDropdown" class="advanced-filters-dropdown" style="display: none;">
+        <div class="advanced-filters-content">
+            <h3>Дополнительные параметры</h3>
+            
+            <div class="advanced-filters-grid">
+                <div class="filter-group">
+                    <label for="buildingTypeFilter">Тип дома</label>
+                    <div class="custom-select">
+                        <select id="buildingTypeFilter">
+                            <option value="">Любой тип</option>
+                            <option value="Кирпичный">Кирпичный</option>
+                            <option value="Панельный">Панельный</option>
+                            <option value="Монолитный">Монолитный</option>
+                            <option value="Блочный">Блочный</option>
+                            <option value="Деревянный">Деревянный</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="bathroomTypeFilter">Тип санузла</label>
+                    <div class="custom-select">
+                        <select id="bathroomTypeFilter">
+                            <option value="">Любой</option>
+                            <option value="Раздельный">Раздельный</option>
+                            <option value="Совмещенный">Совмещенный</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="balconyTypeFilter">Балкон/Лоджия</label>
+                    <div class="custom-select">
+                        <select id="balconyTypeFilter">
+                            <option value="">Не важно</option>
+                            <option value="Балкон">Балкон</option>
+                            <option value="Лоджия">Лоджия</option>
+                            <option value="Терраса">Терраса</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="repairTypeFilter">Ремонт</label>
+                    <div class="custom-select">
+                        <select id="repairTypeFilter">
+                            <option value="">Любой</option>
+                            <option value="Без ремонта">Без ремонта</option>
+                            <option value="Косметический">Косметический</option>
+                            <option value="Евроремонт">Евроремонт</option>
+                            <option value="Дизайнерский">Дизайнерский</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="windowViewFilter">Вид из окон</label>
+                    <div class="custom-select">
+                        <select id="windowViewFilter">
+                            <option value="">Не важно</option>
+                            <option value="На двор">На двор</option>
+                            <option value="На улицу">На улицу</option>
+                            <option value="На парк">На парк</option>
+                            <option value="На водоем">На водоем</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="parkingTypeFilter">Парковка</label>
+                    <div class="custom-select">
+                        <select id="parkingTypeFilter">
+                            <option value="">Не важно</option>
+                            <option value="Подземная">Подземная</option>
+                            <option value="Наземная">Наземная</option>
+                            <option value="Во дворе">Во дворе</option>
+                            <option value="Нет">Нет</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="heatingTypeFilter">Отопление</label>
+                    <div class="custom-select">
+                        <select id="heatingTypeFilter">
+                            <option value="">Любое</option>
+                            <option value="Центральное">Центральное</option>
+                            <option value="Автономное">Автономное</option>
+                            <option value="Электрическое">Электрическое</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="gasSupplyFilter">Газоснабжение</label>
+                    <div class="custom-select">
+                        <select id="gasSupplyFilter">
+                            <option value="">Не важно</option>
+                            <option value="Центральное">Центральное</option>
+                            <option value="Баллонное">Баллонное</option>
+                            <option value="Нет">Нет</option>
+                        </select>
+                        <div class="select-arrow">
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="advanced-filters-actions">
+                <button type="button" class="btn-secondary" onclick="resetAdvancedFilters()">Сбросить</button>
+                <button type="button" class="btn-primary" onclick="applyAdvancedFilters()">Применить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <div class="footer-logo">
+                    <h3>CityAR</h3>
+                    <p>Ваш надежный партнер в мире недвижимости</p>
+                </div>
+                <div class="footer-social">
+                    <a href="#" class="social-link">
+                        <i class="fab fa-telegram"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-vk"></i>
+                    </a>
+                    <a href="#" class="social-link">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-section">
+                <h4>Каталог</h4>
+                <ul class="footer-links">
+                    <li><a href="index.html">Все объекты</a></li>
+                    <li><a href="index.html?type=apartment">Квартиры</a></li>
+                    <li><a href="index.html?type=house">Дома</a></li>
+                    <li><a href="index.html?type=commercial">Коммерческая</a></li>
+                    <li><a href="index.html?type=land">Земельные участки</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Сервисы</h4>
+                <ul class="footer-links">
+                    <li><a href="requests.html">Мои заявки</a></li>
+                    <li><a href="cabinet.html">Личный кабинет</a></li>
+                    <li><a href="#" onclick="showFormModal({
+                        title: 'Оценка недвижимости',
+                        formFields: [
+                            {type: 'text', name: 'address', label: 'Адрес объекта', required: true},
+                            {type: 'tel', name: 'phone', label: 'Телефон', required: true},
+                            {type: 'textarea', name: 'details', label: 'Описание объекта', rows: 3}
+                        ]
+                    })">Оценка недвижимости</a></li>
+                    <li><a href="#" onclick="showFormModal({
+                        title: 'Консультация риэлтора',
+                        formFields: [
+                            {type: 'text', name: 'name', label: 'Ваше имя', required: true},
+                            {type: 'tel', name: 'phone', label: 'Телефон', required: true},
+                            {type: 'textarea', name: 'question', label: 'Ваш вопрос', rows: 3}
+                        ]
+                    })">Консультация</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Контакты</h4>
+                <div class="footer-contact">
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>г. Москва, ул. Тверская, д. 15</span>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <a href="tel:+79266124929">+7 (926) 612-49-29</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <a href="mailto:info@cityar.ru">info@cityar.ru</a>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Пн-Пт: 9:00-20:00<br>Сб-Вс: 10:00-18:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <div class="footer-copyright">
+                    <p>&copy; 2024 CityAR. Все права защищены.</p>
+                </div>
+                <div class="footer-legal">
+                    <a href="#">Политика конфиденциальности</a>
+                    <a href="#">Пользовательское соглашение</a>
+                    <a href="#">Карта сайта</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html> 
